@@ -17,7 +17,7 @@
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
   
   <title>
-    CTF pwn入门小结 |
+    CTFpwn入门 |
     
     淋着雨
   </title>
@@ -31,30 +31,32 @@
   
   
     
-<link rel="stylesheet" href="/css/loader.css">
+<link rel="stylesheet" href="../../../../css/loader.css">
 
   
   
-    <meta name="description" content="#1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。 在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般">
+    <meta name="description" content="1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。  在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CTF pwn入门小结">
-<meta property="og:url" content="http://1t01x1w4.github.io/2026/02/12/CTF%20pwn%E5%85%A5%E9%97%A8%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:title" content="CTFpwn入门">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="#1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。 在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般">
+<meta property="og:description" content="1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。  在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-02-12T02:34:50.166Z">
-<meta property="article:modified_time" content="2026-02-12T04:18:36.169Z">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/image1.png">
+<meta property="article:published_time" content="2026-02-12T08:17:42.000Z">
+<meta property="article:modified_time" content="2026-02-12T08:30:36.331Z">
 <meta property="article:author" content="淋着雨">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/image1.png">
   
   
-    <link rel="alternate" href="/atom.xml" title="淋着雨" type="application/atom+xml">
+    <link rel="alternate" href="../../../../atom.xml" title="淋着雨" type="application/atom+xml">
   
   
-    <link rel="shortcut icon" href="/images/favicon.ico">
+    <link rel="shortcut icon" href="../../../../images/favicon.ico">
   
   
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="../../../../css/style.css">
 
   <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
   
@@ -140,7 +142,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="/">主页</a>
+          <a class="main-nav-link" href="../../../../index.html">主页</a>
         </span>
       
         <span class="main-nav-link-wrap">
@@ -149,7 +151,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="/archive">归档</a>
+          <a class="main-nav-link" href="../../../../archive">归档</a>
         </span>
       
         <span class="main-nav-link-wrap">
@@ -158,7 +160,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="/friend">友链</a>
+          <a class="main-nav-link" href="../../../../friend">友链</a>
         </span>
       
     
@@ -166,7 +168,7 @@
   </nav>
   <nav id="sub-nav">
     
-      <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅" target="_blank"></a>
+      <a id="nav-rss-link" class="nav-icon" href="../../../../atom.xml" title="RSS 订阅" target="_blank"></a>
     
     
     
@@ -181,7 +183,7 @@
           
         </picture>
         
-          <img  fetchpriority="high" src="/images/bannner.webp" alt="CTF pwn入门小结">
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="CTFpwn入门">
         
       
     
@@ -192,7 +194,7 @@
         
         
           <span id="logo">
-            <h1 data-aos="slide-up">CTF pwn入门小结</h1>
+            <h1 data-aos="slide-up">CTFpwn入门</h1>
           </span>
         
       
@@ -234,7 +236,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">2</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -305,12 +307,12 @@
   
 </aside>
 
-          <section id="main"><article id="post-CTF pwn入门小结" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+          <section id="main"><article id="post-CTFpwn入门" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-inner" data-aos="fade-up">
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-02-12T02:34:50.166Z" itemprop="datePublished">2026-02-12</time>
+    <time datetime="2026-02-12T08:17:42.000Z" itemprop="datePublished">2026-02-12</time>
     <time style="display: none;" id="post-update-time">2026-02-12</time>
   </span>
   
@@ -326,13 +328,37 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
       
-        <p>#1.栈溢出</p>
+        <p>1.栈溢出</p>
 <p>在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。</p>
+<p><img src="image1.png" alt="函数调用栈示意图"></p>
 <p>在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。</p>
 <p>栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么就有可能出现输入的内容过多从而覆盖了bp和返回地址。如果我们已知shell的地址，那么就可以构造“填充+shell地址”的payload，从而getshell，当然这也是最简单的情况。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">r = remote(&quot;IP&quot;, 端口)</span><br><span class="line">#p = process(&quot;./&lt;ELF文件&gt;&quot;)</span><br><span class="line"></span><br><span class="line">payload = b&#x27;a&#x27;*(栈空间大小 + 4) + p32(shell地址)</span><br><span class="line"></span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
 
 <p>其中，p32()用于将地址转换为32位程序能够接收的类型，64位类似即用p64()；填充的字符的数量中加4是为了覆盖栈底，32位填充4字节，64位则需要填充8字节。</p>
+<p>2.ROP链<br>当程序中没有可用的后门函数时，但出现了“system()”和“&#x2F;bin&#x2F;sh”这些字段，考虑构造ROP链。其中32位程序和64位程序构造ROP链时有所区别。</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>传参方式</th>
+<th>关键点</th>
+<th>你的Payload顺序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>64位</td>
+<td>寄存器(rdi, rsi…)</td>
+<td>需要pop rdi; ret这样的Gadget</td>
+<td>pop_rdi -&gt; 参数 -&gt; 函数地址</td>
+</tr>
+<tr>
+<td>32位</td>
+<td>栈</td>
+<td>模拟函数调用栈布局</td>
+<td>函数地址 -&gt; 返回地址 -&gt; 参数</td>
+</tr>
+</tbody></table>
 
       
     </div>
@@ -358,14 +384,14 @@
       
         
         
-          <img data-src="https://d-sketon.top/img/_backwebp/bg1.webp" data-sizes="auto" alt="Welcome to my first blog!" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
-      <a href="/2026/02/11/my%20first%20blog/"></a>
+      <a href="/2026/02/10/hello-world/"></a>
       <div class="article-nav-caption">后一篇</div>
       <h3 class="article-nav-title">
         
-          Welcome to my first blog!
+          Hello World
         
       </h3>
     </div>
@@ -411,7 +437,7 @@
     
       <div>
         <span class="icon-brush"></span>
-        511
+        621
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:03
@@ -459,7 +485,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">2</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -536,12 +562,12 @@
 
 
 
-<script src="/js/script.js"></script>
+<script src="../../../../js/script.js"></script>
 
 
 
   
-<script src="/js/aos.js"></script>
+<script src="../../../../js/aos.js"></script>
 
   <script>
     var aosInit = () => {
@@ -561,7 +587,7 @@
 
 
 
-<script src="/js/pjax_script.js" data-pjax></script>
+<script src="../../../../js/pjax_script.js" data-pjax></script>
 
 
 
@@ -593,13 +619,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "淋着雨",
-          title: "CTF pwn入门小结",
-          url: "http://1t01x1w4.github.io/2026/02/12/CTF%20pwn%E5%85%A5%E9%97%A8%E5%B0%8F%E7%BB%93/",
+          title: "CTFpwn入门",
+          url: "http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/",
           excerpt: "",
           description: "",
-          stripContent: "#1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。 在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们",
-          date: "Thu Feb 12 2026 10:34:50 GMT+0800",
-          updated: "Thu Feb 12 2026 12:18:36 GMT+0800",
+          stripContent: "1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。  在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们",
+          date: "Thu Feb 12 2026 16:17:42 GMT+0800",
+          updated: "Thu Feb 12 2026 16:30:36 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
@@ -608,7 +634,7 @@
     
       
         
-<script src="/js/insert_highlight.js" data-pjax></script>
+<script src="../../../../js/insert_highlight.js" data-pjax></script>
 
         
       

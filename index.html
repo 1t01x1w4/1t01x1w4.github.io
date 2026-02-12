@@ -30,7 +30,7 @@
   
   
     
-<link rel="stylesheet" href="/css/loader.css">
+<link rel="stylesheet" href="css/loader.css">
 
   
   
@@ -47,13 +47,13 @@
 <meta name="twitter:image" content="http://1t01x1w4.github.io/images/bannner.webp">
   
   
-    <link rel="alternate" href="/atom.xml" title="淋着雨" type="application/atom+xml">
+    <link rel="alternate" href="atom.xml" title="淋着雨" type="application/atom+xml">
   
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
   
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="css/style.css">
 
   <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
   
@@ -139,7 +139,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="/">主页</a>
+          <a class="main-nav-link" href="index.html">主页</a>
         </span>
       
         <span class="main-nav-link-wrap">
@@ -165,7 +165,7 @@
   </nav>
   <nav id="sub-nav">
     
-      <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅" target="_blank"></a>
+      <a id="nav-rss-link" class="nav-icon" href="atom.xml" title="RSS 订阅" target="_blank"></a>
     
     
     
@@ -225,7 +225,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">2</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -296,14 +296,14 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="/2026/02/12/CTF%20pwn%E5%85%A5%E9%97%A8%E5%B0%8F%E7%BB%93/" aria-label="CTF pwn入门小结"></a>
+      <a class="post-link" href="2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/" aria-label="CTFpwn入门"></a>
     
     
     <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="CTF pwn入门小结" class="lazyload">
+          <img data-src="https://d-sketon.top/img/_backwebp/bg1.webp" data-sizes="auto" alt="CTFpwn入门" class="lazyload">
         
       
     </div>
@@ -311,14 +311,15 @@
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-12</span>
         
-        <span><span class="icon-pencil"></span>429 字</span>
-        <span><span class="icon-clock"></span>1 分钟</span>
+        <span><span class="icon-pencil"></span>546 字</span>
+        <span><span class="icon-clock"></span>2 分钟</span>
       </div>
-      <h2 class="post-title">CTF pwn入门小结</h2>
+      <h2 class="post-title">CTFpwn入门</h2>
       <article class="post-article">
         
-          #1.栈溢出
+          1.栈溢出
 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。
+
 在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。
 栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么
         
@@ -331,48 +332,14 @@
       <div class="post-wrapper">
   <div class="post-wrap right" data-aos="fade-up">
     
-      <a class="post-link" href="/2026/02/11/my%20first%20blog/" aria-label="Welcome to my first blog!"></a>
+      <a class="post-link" href="2026/02/10/hello-world/" aria-label="Hello World"></a>
     
     
     <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="Welcome to my first blog!" class="lazyload">
-        
-      
-    </div>
-    <div class="post-info">
-      <div class="post-meta">
-        <span><span class="icon-calendar"></span>2026-02-11</span>
-        
-        <span><span class="icon-pencil"></span>7 字</span>
-        <span><span class="icon-clock"></span>1 分钟</span>
-      </div>
-      <h2 class="post-title">Welcome to my first blog!</h2>
-      <article class="post-article">
-        
-          本文仅用于测试。
-
-
-        
-      </article>
-    </div>
-  </div>
-</div>
-      
-    
-      <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
-    
-      <a class="post-link" href="/2026/02/10/hello-world/" aria-label="Hello World"></a>
-    
-    
-    <div class="post-cover left">
-      
-        
-        
-          <img data-src="https://d-sketon.top/img/_backwebp/bg1.webp" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="/covers/bannner.jpeg" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
@@ -429,7 +396,7 @@ Run server1$ hexo ser
     
       <div>
         <span class="icon-brush"></span>
-        511
+        621
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:03
@@ -469,7 +436,7 @@ Run server1$ hexo ser
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">2</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -538,12 +505,12 @@ Run server1$ hexo ser
 
 
 
-<script src="/js/script.js"></script>
+<script src="js/script.js"></script>
 
 
 
   
-<script src="/js/aos.js"></script>
+<script src="js/aos.js"></script>
 
   <script>
     var aosInit = () => {
@@ -563,7 +530,7 @@ Run server1$ hexo ser
 
 
 
-<script src="/js/pjax_script.js" data-pjax></script>
+<script src="js/pjax_script.js" data-pjax></script>
 
 
 
