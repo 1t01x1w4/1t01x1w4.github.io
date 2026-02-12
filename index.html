@@ -303,7 +303,7 @@
       
         
         
-          <img data-src="https://d-sketon.top/img/_backwebp/bg1.webp" data-sizes="auto" alt="CTF pwn入门小结" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="CTF pwn入门小结" class="lazyload">
         
       
     </div>
@@ -318,7 +318,9 @@
       <article class="post-article">
         
           #1.栈溢出
-在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么就有
+在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。
+在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。
+栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么
         
       </article>
     </div>
@@ -336,7 +338,7 @@
       
         
         
-          <img data-src="/covers/bannner.jpeg" data-sizes="auto" alt="Welcome to my first blog!" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="Welcome to my first blog!" class="lazyload">
         
       
     </div>
@@ -370,7 +372,7 @@
       
         
         
-          <img data-src="/covers/bannner.jpeg" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="https://d-sketon.top/img/_backwebp/bg1.webp" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
