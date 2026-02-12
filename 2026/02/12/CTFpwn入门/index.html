@@ -44,7 +44,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/image1.png">
 <meta property="article:published_time" content="2026-02-12T08:17:42.000Z">
-<meta property="article:modified_time" content="2026-02-12T08:30:36.331Z">
+<meta property="article:modified_time" content="2026-02-12T08:50:45.363Z">
 <meta property="article:author" content="淋着雨">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://1t01x1w4.github.io/2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/image1.png">
@@ -328,7 +328,7 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
       
-        <p>1.栈溢出</p>
+        <p>1.<strong>栈溢出</strong></p>
 <p>在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。</p>
 <p><img src="image1.png" alt="函数调用栈示意图"></p>
 <p>在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。</p>
@@ -336,7 +336,8 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">r = remote(&quot;IP&quot;, 端口)</span><br><span class="line">#p = process(&quot;./&lt;ELF文件&gt;&quot;)</span><br><span class="line"></span><br><span class="line">payload = b&#x27;a&#x27;*(栈空间大小 + 4) + p32(shell地址)</span><br><span class="line"></span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
 
 <p>其中，p32()用于将地址转换为32位程序能够接收的类型，64位类似即用p64()；填充的字符的数量中加4是为了覆盖栈底，32位填充4字节，64位则需要填充8字节。</p>
-<p>2.ROP链<br>当程序中没有可用的后门函数时，但出现了“system()”和“&#x2F;bin&#x2F;sh”这些字段，考虑构造ROP链。其中32位程序和64位程序构造ROP链时有所区别。</p>
+<p>2.<strong>ROP链</strong></p>
+<p>当程序中没有可用的后门函数时，但出现了“system()”和“&#x2F;bin&#x2F;sh”这些片段，考虑构造ROP链。其中32位程序和64位程序构造ROP链时有所区别。</p>
 <table>
 <thead>
 <tr>
@@ -359,6 +360,9 @@
 <td>函数地址 -&gt; 返回地址 -&gt; 参数</td>
 </tr>
 </tbody></table>
+<p>3.<strong>ret2libc</strong></p>
+<p>C语言有一个标准函数库libc，c文件运行时会从libc库中调用相应的函数进行使用。当发现程序中没有可利用片段时，考虑用输出函数puts()、write()这些函数来对某个函数在gpt表中的地址进行泄露，获取libc库版本并计算偏移量从而得到system()函数和“\bin\sh”的地址。（地址关系：函数真实地址 &#x3D; libc库基址 + 函数在库中的偏移量）</p>
+<p>补充：libc中存在got表和plt表，plt存放的是进入这个函数的地址，而got表中存放的是这个函数的真正地址。</p>
 
       
     </div>
@@ -437,7 +441,7 @@
     
       <div>
         <span class="icon-brush"></span>
-        621
+        787
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:03
@@ -625,7 +629,7 @@
           description: "",
           stripContent: "1.栈溢出 在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。  在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。 栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们",
           date: "Thu Feb 12 2026 16:17:42 GMT+0800",
-          updated: "Thu Feb 12 2026 16:30:36 GMT+0800",
+          updated: "Thu Feb 12 2026 16:50:45 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
