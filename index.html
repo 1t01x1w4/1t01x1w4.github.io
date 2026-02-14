@@ -148,6 +148,15 @@
               &#xe62b;
              
           </div>
+          <a class="main-nav-link" href="/categories">分类</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
           <a class="main-nav-link" href="/tags">标签</a>
         </span>
       
@@ -229,11 +238,11 @@
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
-    <div class="sidebar-state-number">0</div>
+    <div class="sidebar-state-number">1</div>
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">0</div>
+    <div class="sidebar-state-number">1</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -250,6 +259,16 @@
           
         </div>
         <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/categories" aria-label="分类"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">分类</div>
       </div>
     
       <div class="sidebar-menu-link-wrap">
@@ -296,14 +315,14 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/" aria-label=""></a>
+      <a class="post-link" href="2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/" aria-label="CTFpwn入门"></a>
     
     
     <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-战斗姿态.png" data-sizes="auto" alt="" class="lazyload">
+          <img data-src="/covers/bannner.jpeg" data-sizes="auto" alt="CTFpwn入门" class="lazyload">
         
       
     </div>
@@ -312,18 +331,15 @@
         <span><span class="icon-calendar"></span>2026-02-12</span>
         
         <span><span class="icon-pencil"></span>1k 字</span>
-        <span><span class="icon-clock"></span>4 分钟</span>
+        <span><span class="icon-clock"></span>3 分钟</span>
       </div>
-      <h2 class="post-title"></h2>
+      <h2 class="post-title">CTFpwn入门</h2>
       <article class="post-article">
         
-          
-title: CTFpwn入门date: 2026-02-12 16:17:42tags:    - pwncategories:- CTF
-
-栈溢出在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。
+          栈溢出在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。
 
 在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。
-栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指
+栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么就有可
         
       </article>
     </div>
@@ -401,7 +417,7 @@ Run server1$ hexo ser
         1.1k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:05
+        00:04
       </div>
     
     
@@ -442,11 +458,11 @@ Run server1$ hexo ser
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
-    <div class="sidebar-state-number">0</div>
+    <div class="sidebar-state-number">1</div>
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">0</div>
+    <div class="sidebar-state-number">1</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -463,6 +479,16 @@ Run server1$ hexo ser
           
         </div>
         <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/categories" aria-label="分类"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">分类</div>
       </div>
     
       <div class="sidebar-menu-link-wrap">
