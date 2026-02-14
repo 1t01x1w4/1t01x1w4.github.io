@@ -219,7 +219,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">2</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -227,7 +227,7 @@
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">1</div>
+    <div class="sidebar-state-number">3</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -290,6 +290,80 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
+      <a class="post-link" href="2026/02/14/ret2libc/" aria-label="ret2libc"></a>
+    
+    
+    <div class="post-cover left">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-02-14</span>
+        
+        <span><span class="icon-pencil"></span>8 字</span>
+        <span><span class="icon-clock"></span>1 分钟</span>
+      </div>
+      <h2 class="post-title">ret2libc</h2>
+      <article class="post-article">
+        
+          在讲ret2libc前先讲一下ret2shellcode。
+
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap right" data-aos="fade-up">
+    
+      <a class="post-link" href="2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
+    
+    
+    <div class="post-cover right">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-02-14</span>
+        
+        <span><span class="icon-pencil"></span>640 字</span>
+        <span><span class="icon-clock"></span>2 分钟</span>
+      </div>
+      <h2 class="post-title">栈溢出</h2>
+      <article class="post-article">
+        
+          程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。本文以32位架构为例，栈的特点如下：
+
+栈从高地址向低地址生长。
+函数调用时形成一个栈帧（Stack Frame）。
+向栈中写入数据是按低地址到高地址的方向。
+
+函数调用时栈的变化下面用几条汇编指令来展开。
+
+“call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被调函数执行结束后跳转到调用处的下一条指令。
+“push ebp”，向栈中压入主调函数的帧基指针（ebp），方便被调函数
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap left" data-aos="fade-up">
+    
       <a class="post-link" href="2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/" aria-label="CTFpwn入门"></a>
     
     
@@ -297,7 +371,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="CTFpwn入门" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="CTFpwn入门" class="lazyload">
         
       
     </div>
@@ -332,7 +406,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
@@ -389,10 +463,10 @@ Run server1$ hexo ser
     
       <div>
         <span class="icon-brush"></span>
-        1.1k
+        1.7k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:04
+        00:07
       </div>
     
     
@@ -429,7 +503,7 @@ Run server1$ hexo ser
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">2</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -437,7 +511,7 @@ Run server1$ hexo ser
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">1</div>
+    <div class="sidebar-state-number">3</div>
   </div>
 </div>
 <div class="sidebar-social">
