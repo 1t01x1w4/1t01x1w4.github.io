@@ -227,7 +227,7 @@
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">4</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -290,31 +290,29 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="2026/02/14/ret2libc/" aria-label="ret2libc"></a>
+      <a class="post-link" href="2026/02/15/ret2libc/" aria-label="ret2libc"></a>
     
     
     <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
     <div class="post-info">
       <div class="post-meta">
-        <span><span class="icon-calendar"></span>2026-02-14</span>
+        <span><span class="icon-calendar"></span>2026-02-15</span>
         
-        <span><span class="icon-pencil"></span>613 字</span>
+        <span><span class="icon-pencil"></span>741 字</span>
         <span><span class="icon-clock"></span>2 分钟</span>
       </div>
       <h2 class="post-title">ret2libc</h2>
       <article class="post-article">
         
-          ret2shellcode当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
-asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。
-可利用如下脚本实现：
-123456789from pwn import *  r = remote(&amp;quot;IP&amp;quot;, 端口)  #p = 
+          libclibc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接libc，便可以调用库中的函数进行使用。libc中存在got（全局偏移表）和plt（进程链接表），其中plt存放的是进入这个函数的地址，而got表中存放的是这个函数的真正地址。
+程序中每次调用函数标准函数，实际上就是跳转到该函数的plt表地址，如果plt表中已经有函数地址了，就可以直接使用；如果plt表中并没有该函数的地址，那么便会通过一种映射关系跳转到got表中去查找函数的真实地址，链接并返回调用。函数在libc中的地址关系是这样的：真实地址 &amp;#x3D; libc基址 + 函数偏移
         
       </article>
     </div>
@@ -325,14 +323,49 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       <div class="post-wrapper">
   <div class="post-wrap right" data-aos="fade-up">
     
-      <a class="post-link" href="2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
+      <a class="post-link" href="2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
     
     
     <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-02-15</span>
+        
+        <span><span class="icon-pencil"></span>162 字</span>
+        <span><span class="icon-clock"></span>1 分钟</span>
+      </div>
+      <h2 class="post-title">ret2shellcode</h2>
+      <article class="post-article">
+        
+          当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
+asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。
+可利用如下脚本实现：
+123456789from pwn import *  r = remote(&amp;quot;IP&amp;quot;, 端口)  #p = process(&amp;quot
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap left" data-aos="fade-up">
+    
+      <a class="post-link" href="2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
+    
+    
+    <div class="post-cover left">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -364,41 +397,6 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
-    
-      <a class="post-link" href="2026/02/12/CTFpwn%E5%85%A5%E9%97%A8/" aria-label="CTFpwn入门"></a>
-    
-    
-    <div class="post-cover left">
-      
-        
-        
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="CTFpwn入门" class="lazyload">
-        
-      
-    </div>
-    <div class="post-info">
-      <div class="post-meta">
-        <span><span class="icon-calendar"></span>2026-02-12</span>
-        
-        <span><span class="icon-pencil"></span>1k 字</span>
-        <span><span class="icon-clock"></span>3 分钟</span>
-      </div>
-      <h2 class="post-title">CTFpwn入门</h2>
-      <article class="post-article">
-        
-          栈溢出在内存进程中，栈从最高地址往低地址“生长”。当前函数中调用函数时，被调函数的参数会被压入栈中，也就是放在了当前函数（称为主调函数）栈的上面。这里以32位程序为例。
-
-在将被调函数参数压栈前，一般会将原来的帧基指针也就是主调函数的栈底地址压栈，方便当被调函数调用结束后bp回到原来的位置。而在栈底下则是函数返回地址，用于当被调函数执行结束后程序回退到主调函数中的下一个指令。
-栈溢出漏洞一般伴随get()这样的输入函数出现。这里要注意一点，函数参数指令压栈是从高地址往低地址“生长”，而我们进行输入是平行输入即输入的内容是从栈空间的低地址往高地址进行填充。如果函数没有对输入大小做限制，那么就有可
-        
-      </article>
-    </div>
-  </div>
-</div>
-      
-    
-      <div class="post-wrapper">
   <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/10/hello-world/" aria-label="Hello World"></a>
@@ -408,7 +406,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
@@ -465,10 +463,10 @@ Run server1$ hexo ser
     
       <div>
         <span class="icon-brush"></span>
-        2.4k
+        1.6k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:08
+        00:06
       </div>
     
     
@@ -513,7 +511,7 @@ Run server1$ hexo ser
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">3</div>
+    <div class="sidebar-state-number">4</div>
   </div>
 </div>
 <div class="sidebar-social">
