@@ -297,7 +297,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -330,7 +330,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -338,16 +338,14 @@
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-15</span>
         
-        <span><span class="icon-pencil"></span>162 字</span>
+        <span><span class="icon-pencil"></span>215 字</span>
         <span><span class="icon-clock"></span>1 分钟</span>
       </div>
       <h2 class="post-title">ret2shellcode</h2>
       <article class="post-article">
         
           当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
-asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。
-可利用如下脚本实现：
-123456789from pwn import *  r = remote(&amp;quot;IP&amp;quot;, 端口)  #p = process(&amp;quot
+asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3D; ‘i386’”，生成的是32位的shellcode汇编，如果碰到64位的程序，需要在脚本中添加“c
         
       </article>
     </div>
@@ -365,7 +363,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -406,7 +404,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
@@ -463,7 +461,7 @@ Run server1$ hexo ser
     
       <div>
         <span class="icon-brush"></span>
-        1.6k
+        1.7k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:06
