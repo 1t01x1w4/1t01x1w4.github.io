@@ -305,13 +305,13 @@
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-03-13</span>
         
-        <span><span class="icon-pencil"></span>535 字</span>
+        <span><span class="icon-pencil"></span>533 字</span>
         <span><span class="icon-clock"></span>2 分钟</span>
       </div>
       <h2 class="post-title">ret2syscall</h2>
       <article class="post-article">
         
-          引言ret2syscall是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的wp糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用ret2syscall的题发现还是无法灵活处理，所以做此纪录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。
+          ret2syscall是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的wp糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用ret2syscall的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。
 32位与64位下ret2syscall的区别
 
 
@@ -333,7 +333,7 @@ rax
 
 execve的系统调用号
 11(0x0b)
-59(
+59(0x
         
       </article>
     </div>
@@ -351,7 +351,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】中野二乃-五等分.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -365,8 +365,9 @@ execve的系统调用号
       <h2 class="post-title">ret2libc</h2>
       <article class="post-article">
         
-          libclibc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接libc，便可以调用库中的函数进行使用。libc中存在got（全局偏移表）和plt（进程链接表），其中plt存放的是进入这个函数的地址，而got表中存放的是这个函数的真正地址。
-程序中每次调用函数标准函数，实际上就是跳转到该函数的plt表地址，如果plt表中已经有函数地址了，就可以直接使用；如果plt表中并没有该函数的地址，那么便会通过一种映射关系跳转到got表中去查找函数的真实地址，链接并返回调用。函数在libc中的地址关系是这样的：真实地址 &amp;#x3D; libc基址 + 函数偏移
+          libc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接libc，便可以调用库中的函数进行使用。libc中存在got（全局偏移表）和plt（进程链接表），其中plt存放的是进入这个函数的地址，而got表中存放的是这个函数的真正地址。
+程序中每次调用函数标准函数，实际上就是跳转到该函数的plt表地址，如果plt表中已经有函数地址了，就可以直接使用；如果plt表中并没有该函数的地址，那么便会通过一种映射关系跳转到got表中去查找函数的真实地址，链接并返回调用。函数在libc中的地址关系是这样的：真实地址 &amp;#x3D; libc基址 + 函数偏移量 。
+
         
       </article>
     </div>
@@ -384,7 +385,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -417,7 +418,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -458,7 +459,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="Hello World" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="Hello World" class="lazyload">
         
       
     </div>
