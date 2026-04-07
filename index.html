@@ -219,7 +219,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -297,7 +297,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
         
       
     </div>
@@ -305,7 +305,7 @@
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-03-13</span>
         
-        <span><span class="icon-pencil"></span>533 字</span>
+        <span><span class="icon-pencil"></span>539 字</span>
         <span><span class="icon-clock"></span>2 分钟</span>
       </div>
       <h2 class="post-title">ret2syscall</h2>
@@ -351,7 +351,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】中野二乃-五等分.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -359,8 +359,8 @@ execve的系统调用号
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-15</span>
         
-        <span><span class="icon-pencil"></span>741 字</span>
-        <span><span class="icon-clock"></span>2 分钟</span>
+        <span><span class="icon-pencil"></span>983 字</span>
+        <span><span class="icon-clock"></span>3 分钟</span>
       </div>
       <h2 class="post-title">ret2libc</h2>
       <article class="post-article">
@@ -393,14 +393,14 @@ execve的系统调用号
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-15</span>
         
-        <span><span class="icon-pencil"></span>215 字</span>
+        <span><span class="icon-pencil"></span>226 字</span>
         <span><span class="icon-clock"></span>1 分钟</span>
       </div>
       <h2 class="post-title">ret2shellcode</h2>
       <article class="post-article">
         
-          当程序没有做好保护措施时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
-asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3D; ‘i386’”，生成的是32位的shellcode汇编，如果碰到64位的程序，需要在脚本中添加“c
+          当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
+asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3D; ‘i386’”，生成的是32位的shellcode汇编，如果碰到64位的程序，需要在脚本中添加
         
       </article>
     </div>
@@ -418,7 +418,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -426,58 +426,22 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-14</span>
         
-        <span><span class="icon-pencil"></span>647 字</span>
-        <span><span class="icon-clock"></span>2 分钟</span>
+        <span><span class="icon-pencil"></span>877 字</span>
+        <span><span class="icon-clock"></span>3 分钟</span>
       </div>
       <h2 class="post-title">栈溢出</h2>
       <article class="post-article">
         
-          程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。本文以32位架构为例，栈的特点如下：
+          程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：
 
 栈从高地址向低地址生长。
 函数调用时形成一个栈帧（Stack Frame）。
 向栈中写入数据是按低地址到高地址的方向。
 
-函数调用时栈的变化下面用几条汇编指令来展开。
+函数调用时栈的变化32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等。
+下面用几条汇编指令来展开。
 
-“call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被调函数执行结束后跳转到调用处的下一条指令。
-“push ebp”，向栈中压入主调函数的帧基指针（ebp），方便被调函数
-        
-      </article>
-    </div>
-  </div>
-</div>
-      
-    
-      <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
-    
-      <a class="post-link" href="2026/02/10/hello-world/" aria-label="Hello World"></a>
-    
-    
-    <div class="post-cover left">
-      
-        
-        
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="Hello World" class="lazyload">
-        
-      
-    </div>
-    <div class="post-info">
-      <div class="post-meta">
-        <span><span class="icon-calendar"></span>2026-02-10</span>
-        
-        <span><span class="icon-pencil"></span>75 字</span>
-        <span><span class="icon-clock"></span>1 分钟</span>
-      </div>
-      <h2 class="post-title">Hello World</h2>
-      <article class="post-article">
-        
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick StartCreate a new post1$ hexo new &amp;quot;My New Post&amp;quot;
-
-More info: Writing
-Run server1$ hexo ser
+“call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被调函数执
         
       </article>
     </div>
@@ -516,10 +480,10 @@ Run server1$ hexo ser
     
       <div>
         <span class="icon-brush"></span>
-        2.2k
+        2.6k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:08
+        00:09
       </div>
     
     
@@ -556,7 +520,7 @@ Run server1$ hexo ser
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">4</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
