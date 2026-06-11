@@ -219,7 +219,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">6</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -227,7 +227,7 @@
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">6</div>
+    <div class="sidebar-state-number">8</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -290,10 +290,47 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/" aria-label="Earth靶机渗透"></a>
+      <a class="post-link" href="2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/" aria-label="记一道pwn入门堆题 off-by-one"></a>
     
     
     <div class="post-cover left">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-06-11</span>
+        
+        <span><span class="icon-pencil"></span>1k 字</span>
+        <span><span class="icon-clock"></span>4 分钟</span>
+      </div>
+      <h2 class="post-title">记一道pwn入门堆题 off-by-one</h2>
+      <article class="post-article">
+        
+          之前开始学堆时练手的新手题感觉对我个人来说还是太难了，导致我一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，极大提高了我的自信心。
+程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。
+
+程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。
+
+ida伪代码分析main函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是create_heap函数以及edit_hea
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap right" data-aos="fade-up">
+    
+      <a class="post-link" href="2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/" aria-label="Earth靶机渗透"></a>
+    
+    
+    <div class="post-cover right">
       
         
         
@@ -323,16 +360,16 @@
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="2026/03/13/ret2syscall/" aria-label="ret2syscall"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
         
       
     </div>
@@ -377,16 +414,16 @@ execve的系统调用号
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
+  <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/15/ret2libc/" aria-label="ret2libc"></a>
     
     
-    <div class="post-cover left">
+    <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】中野二乃-五等分.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -411,16 +448,16 @@ execve的系统调用号
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -444,16 +481,16 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
+  <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
     
     
-    <div class="post-cover left">
+    <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -515,10 +552,10 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
     
       <div>
         <span class="icon-brush"></span>
-        4.2k
+        5.2k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:15
+        00:19
       </div>
     
     
@@ -555,7 +592,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">5</div>
+    <div class="sidebar-state-number">6</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -563,7 +600,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">6</div>
+    <div class="sidebar-state-number">8</div>
   </div>
 </div>
 <div class="sidebar-social">
