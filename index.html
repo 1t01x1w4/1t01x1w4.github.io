@@ -219,7 +219,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">6</div>
+    <div class="sidebar-state-number">7</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -227,7 +227,7 @@
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">8</div>
+    <div class="sidebar-state-number">10</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -290,10 +290,43 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/" aria-label="记一道pwn入门堆题 off-by-one"></a>
+      <a class="post-link" href="2026/07/19/%E8%AE%B0SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5/" aria-label="记SSTI模板注入"></a>
     
     
     <div class="post-cover left">
+      
+        
+        
+          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="记SSTI模板注入" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-07-19</span>
+        
+        <span><span class="icon-pencil"></span>2.1k 字</span>
+        <span><span class="icon-clock"></span>8 分钟</span>
+      </div>
+      <h2 class="post-title">记SSTI模板注入</h2>
+      <article class="post-article">
+        
+          最近打靶机碰到一个 Tornado 框架的模板注入，之前只接触过一点皮毛，知道用().__class__.__bases__().__subclasses__()列出当前类的根类下的所有子类，但是接下来该怎么构造payload一窍不通了。本文旨在记录SSTI模板注入的原理、如何构造payload以及绕过手法等，方便复习查看。
+什么是 SSTISSTI，即服务端模板注入（Server-Side Template Injection），本质是用户输入被模板引擎当作代码执行了。例如当提交&amp;#123;&amp;#123;7*7&amp;#125;&amp;#125;时，正常的模板引擎应该把它当作字符串原样渲染，但存在 SST
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap right" data-aos="fade-up">
+    
+      <a class="post-link" href="2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/" aria-label="记一道pwn入门堆题 off-by-one"></a>
+    
+    
+    <div class="post-cover right">
       
         
         
@@ -326,16 +359,16 @@ cerate_h
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/" aria-label="Earth靶机渗透"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
         
       
     </div>
@@ -361,16 +394,16 @@ cerate_h
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
+  <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="2026/03/13/ret2syscall/" aria-label="ret2syscall"></a>
     
     
-    <div class="post-cover left">
+    <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
         
       
     </div>
@@ -415,16 +448,16 @@ execve的系统调用号
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/15/ret2libc/" aria-label="ret2libc"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -449,16 +482,16 @@ execve的系统调用号
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
+  <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
     
     
-    <div class="post-cover left">
+    <div class="post-cover right">
       
         
         
-          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -482,16 +515,16 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】中野二乃-五等分.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -553,10 +586,10 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
     
       <div>
         <span class="icon-brush"></span>
-        5.3k
+        7.4k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:19
+        00:27
       </div>
     
     
@@ -593,7 +626,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">6</div>
+    <div class="sidebar-state-number">7</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -601,7 +634,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">8</div>
+    <div class="sidebar-state-number">10</div>
   </div>
 </div>
 <div class="sidebar-social">
