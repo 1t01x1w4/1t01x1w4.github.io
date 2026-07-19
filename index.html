@@ -297,7 +297,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="记SSTI模板注入" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="记SSTI模板注入" class="lazyload">
         
       
     </div>
@@ -330,7 +330,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
         
       
     </div>
@@ -345,12 +345,11 @@
       <article class="post-article">
         
           之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。
-程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。
+程序分析checksec查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。
 
-程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。
+程序逻辑题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。
 
-ida伪代码分析main函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是create_heap函数以及edit_heap函数。
-cerate_h
+ida伪代码分析main 函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是 create_heap 函数以及 edit_heap
         
       </article>
     </div>
@@ -368,7 +367,7 @@ cerate_h
       
         
         
-          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
         
       
     </div>
@@ -383,9 +382,9 @@ cerate_h
       <article class="post-article">
         
           最近开始学习靶机渗透，目前打了两三个靶机，觉得这个Earth蛮有意思的，写个报告复盘一下。
-主机发现本次渗透用kali作为攻击机，Earth作为靶机，网络模式均设置为“NAT”。开启靶机前，在攻击机上执行“ifconfig”查看到攻击机IP为“192.168.222.129&amp;#x2F;24”，接着执行“nmap -sP 192.168.222.129&amp;#x2F;24”扫描同网段的主机；开启靶机后，再次扫描同网段主机，对比找到靶机IP为“192.168.222.140”。
+主机发现本次渗透用 kali 作为攻击机，Earth 作为靶机，网络模式均设置为NAT。开启靶机前，在攻击机上执行ifconfig”查看到攻击机IP为192.168.222.129/24，接着执行nmap -sP 192.168.222.129/24扫描同网段的主机；开启靶机后，再次扫描同网段主机，对比找到靶机IP为192.168.222.140。
 
-端口扫描执行“namp -sS 192.168.222.140”扫描靶机开放端口，可以看到有一个ssh连接用的端口和两个网
+端口扫描执行namp -sS 192.168.222.140扫描靶机开放端口，可以看到有一个ssh连接用的端口和两个网页服务。再执行nmap -A -p-
         
       </article>
     </div>
@@ -403,7 +402,7 @@ cerate_h
       
         
         
-          <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
         
       
     </div>
@@ -411,13 +410,13 @@ cerate_h
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-03-13</span>
         
-        <span><span class="icon-pencil"></span>543 字</span>
+        <span><span class="icon-pencil"></span>535 字</span>
         <span><span class="icon-clock"></span>2 分钟</span>
       </div>
       <h2 class="post-title">ret2syscall</h2>
       <article class="post-article">
         
-          ret2syscall是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的wp糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用ret2syscall的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。
+          ret2syscall 是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的 wp 糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用 ret2syscall 的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。
 32位与64位下ret2syscall的区别
 
 
@@ -439,7 +438,7 @@ rax
 
 execve的系统调用号
 11(0x0b)
-59(0x
+
         
       </article>
     </div>
@@ -457,7 +456,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -471,9 +470,8 @@ execve的系统调用号
       <h2 class="post-title">ret2libc</h2>
       <article class="post-article">
         
-          libc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接libc，便可以调用库中的函数进行使用。libc中存在got（全局偏移表）和plt（进程链接表），其中plt存放的是进入这个函数的地址，而got表中存放的是这个函数的真正地址。
-程序中每次调用函数标准函数，实际上就是跳转到该函数的plt表地址，如果plt表中已经有函数地址了，就可以直接使用；如果plt表中并没有该函数的地址，那么便会通过一种映射关系跳转到got表中去查找函数的真实地址，链接并返回调用。函数在libc中的地址关系是这样的：真实地址 &amp;#x3D; libc基址 + 函数偏移量 。
-
+          libc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接 libc，便可以调用库中的函数进行使用。libc 中存在got（全局偏移表）和plt（进程链接表），其中 plt 存放的是进入这个函数的地址，而 got 表中存放的是这个函数的真正地址。
+程序中每次调用函数标准函数，实际上就是跳转到该函数的 plt 表地址，如果 plt 表中已经有函数地址了，就可以直接使用；如果 plt 表中并没有该函数的地址，那么便会通过一种映射关系跳转到 got 表中去查找函数的真实地址，链接并返回调用。函数在 libc 中的地址关系是这样的：真实地址 &amp;#x3D; l
         
       </article>
     </div>
@@ -491,7 +489,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -499,14 +497,14 @@ execve的系统调用号
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-15</span>
         
-        <span><span class="icon-pencil"></span>225 字</span>
+        <span><span class="icon-pencil"></span>213 字</span>
         <span><span class="icon-clock"></span>1 分钟</span>
       </div>
       <h2 class="post-title">ret2shellcode</h2>
       <article class="post-article">
         
-          当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入shellcode，并将返回地址覆盖为shellcode的地址，从而getshell。
-asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行“&amp;#x2F;bin&amp;#x2F;sh”的shellcode。需要注意的是，pwntools默认架构是“context.arch &amp;#x3D; ‘i386’”，生成的是32位的shellcode汇编，如果碰到64位的程序，需要在脚本中添加
+          当程序没有开启栈上不可执行时，即便程序中不存在后门函数，攻击者也可以通过不安全输入函数往栈上写入 shellcode，并将返回地址覆盖为 shellcode 的地址，从而getshell。
+asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将汇编代码转为计算机可识别的机器码，shellcraft.sh()则用于生成执行/bin/sh的 shellcode。需要注意的是，pwntools 默认架构是context.arch = &amp;#39;i386&amp;#39;，生成的是 32 位的 shellcode 汇编，如果碰到 64 位的程序，需要在脚本
         
       </article>
     </div>
@@ -532,7 +530,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-02-14</span>
         
-        <span><span class="icon-pencil"></span>877 字</span>
+        <span><span class="icon-pencil"></span>884 字</span>
         <span><span class="icon-clock"></span>3 分钟</span>
       </div>
       <h2 class="post-title">栈溢出</h2>
@@ -544,10 +542,10 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
 函数调用时形成一个栈帧（Stack Frame）。
 向栈中写入数据是按低地址到高地址的方向。
 
-函数调用时栈的变化32位架构下的寄存器包括eax、ebx、esp、ebp等；64位架构下的寄存器名称略有不同，包括rdi、rsi、rdx、rbp等。
+函数调用时栈的变化32位架构下的寄存器包括 eax、ebx、esp、ebp 等；64位架构下的寄存器名称略有不同，包括 rdi、rsi、rdx、rbp 等。
 下面用几条汇编指令来展开。
 
-“call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被调函数执
+“call &amp;lt;被调函数&amp;gt;”，这条指令相当于“push ret_addr”和“jmp”，即向栈中压入返回地址然后跳转到被调函数，压入的返回地址用于被
         
       </article>
     </div>
@@ -586,7 +584,7 @@ asm(shellcraft.sh())用于生成获取shell的shellcode，其中asm()会将汇�
     
       <div>
         <span class="icon-brush"></span>
-        7.4k
+        7.3k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:27

