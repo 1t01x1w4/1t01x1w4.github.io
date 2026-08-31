@@ -24,7 +24,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
   
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
   
   
     <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -58,7 +58,7 @@
   
   
     
-<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" defer></script>
 
   
   
@@ -95,27 +95,16 @@
   </div>
   </div>
   <script>
-    var time = null;
-    var startLoading = () => {
-      time = Date.now();
-      document.getElementById('loader').classList.remove("loading");
-    }
+    var loaderDone = false;
     var endLoading = () => {
-      if (!time) {
-        document.body.style.overflow = 'auto';
-        document.getElementById('loader').classList.add("loading");
-      } else {
-        if (Date.now() - time > 500) {
-          time = null;
-          document.body.style.overflow = 'auto';
-          document.getElementById('loader').classList.add("loading");
-        } else {
-          setTimeout(endLoading, 500 - (Date.now() - time));
-          time = null;
-        }
-      }
+      if (loaderDone) return;
+      loaderDone = true;
+      document.body.style.overflow = 'auto';
+      document.getElementById('loader').classList.add("loading");
     }
-    window.addEventListener('DOMContentLoaded', endLoading);
+    // 优化：加载遮罩改为固定短时长（DOMContentLoaded + 500ms，最多 1.5s），不再被网络请求拖住
+    window.addEventListener('DOMContentLoaded', () => setTimeout(endLoading, 500));
+    setTimeout(endLoading, 1500);
     document.getElementById('loader').addEventListener('click', endLoading);
   </script>
 
@@ -213,7 +202,7 @@
     <div class="sidebar-wrap" data-aos="fade-up">
       
         <div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -301,11 +290,11 @@
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="../../../tags/XEE/">XEE</a>
+      <a class="archives-tag-list-link" href="../../../tags/Earth/">Earth</a>
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="../../../tags/Earth/">Earth</a>
+      <a class="archives-tag-list-link" href="../../../tags/XEE/">XEE</a>
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
@@ -325,11 +314,11 @@
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="../../../tags/syscall/">syscall</a>
+      <a class="archives-tag-list-link" href="../../../tags/SSTI/">SSTI</a>
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
-      <a class="archives-tag-list-link" href="../../../tags/SSTI/">SSTI</a>
+      <a class="archives-tag-list-link" href="../../../tags/syscall/">syscall</a>
     </div>
   
     <div class="archives-tag-list-item" data-aos="zoom-in">
@@ -448,7 +437,7 @@
   <div class="sidebar-wrap">
     
       <div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -515,9 +504,6 @@
     
     
     
-<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
-
-
 <script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
 
 
@@ -529,7 +515,7 @@
 
 
   
-<script src="../../../js/aos.js"></script>
+<script src="../../../js/aos.js" defer></script>
 
   <script>
     var aosInit = () => {
@@ -549,7 +535,7 @@
 
 
 
-<script src="../../../js/pjax_script.js" data-pjax></script>
+<script src="../../../js/pjax_script.js" data-pjax defer></script>
 
 
 
@@ -558,10 +544,17 @@
 
 
   
-<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous" defer></script>
 
   <script>
-    window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    var fireworkInit = () => {
+      window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireworkInit);
+    } else {
+      fireworkInit();
+    }
   </script>
 
 

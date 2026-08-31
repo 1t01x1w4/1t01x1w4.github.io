@@ -144,13 +144,17 @@ _$$(".sidebar-common-btn").forEach((element) => {
   });
 })();
 
-// lazyload
-_$$(".article-entry img").forEach((element) => {
-  if (element.classList.contains("lazyload")) return;
-  element.classList.add("lazyload");
-  element.setAttribute("data-src", element.src);
-  element.setAttribute("data-sizes", "auto");
-  element.removeAttribute("src");
+// native lazy loading (replaces lazysizes)
+_$$(".article-entry img, img.lazyload").forEach((element) => {
+  if (element.classList.contains("lazyloaded")) return;
+  element.setAttribute("loading", "lazy");
+  element.setAttribute("decoding", "async");
+  const show = () => element.classList.add("lazyloaded");
+  if (element.complete) {
+    show();
+  } else {
+    element.addEventListener("load", show, { once: true });
+  }
 });
 
 // to top
