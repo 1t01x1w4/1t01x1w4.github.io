@@ -297,7 +297,7 @@
       
         
         
-          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="XEE漏洞利用" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="XEE漏洞利用" class="lazyload">
         
       
     </div>
@@ -347,7 +347,7 @@ OOB XXE
       
         
         
-          <img data-src="/covers/【哲风壁纸】cg美女-CG美女插图.png" data-sizes="auto" alt="记SSTI模板注入" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="记SSTI模板注入" class="lazyload">
         
       
     </div>
@@ -380,7 +380,7 @@ OOB XXE
       
         
         
-          <img data-src="/covers/【哲风壁纸】CG插画-CG美女插画.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="记一道pwn入门堆题 off-by-one" class="lazyload">
         
       
     </div>
@@ -388,18 +388,19 @@ OOB XXE
       <div class="post-meta">
         <span><span class="icon-calendar"></span>2026-06-11</span>
         
-        <span><span class="icon-pencil"></span>1.1k 字</span>
+        <span><span class="icon-pencil"></span>1k 字</span>
         <span><span class="icon-clock"></span>4 分钟</span>
       </div>
       <h2 class="post-title">记一道pwn入门堆题 off-by-one</h2>
       <article class="post-article">
         
-          之前开始学堆时碰到的新手题对我来说还是太难了，一度暂停了对堆的进一步学习。最近学院办了场比赛，其中这道入门堆题对我来说火候刚好，记录一下。
+          题目来源于校赛决赛。
 程序分析checksec查看开启的保护信息：部分 RELRO、canary 以及堆栈不可执行。
 
 程序逻辑题目给出了 libc 文件，所以先用 pwninit 以及 patchelf 对程序的链接进行设置，确保和远程的环境一致。先运行程序，了解程序的大体逻辑，可以看到是普通菜单题，提供增删改查操作。
 
-ida伪代码分析main 函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是 create_heap 函数以及 edit_heap
+ida伪代码分析main 函数负责调用菜单函数以及各个操作函数，跟进操作函数进行分析。其中引起注意的是 create_heap 函数以及 edit_heap 函数。
+cerate_heap ：维护一个 heaparray 数组，申请堆块时遍历数组找到第一个为空的位置；每次申
         
       </article>
     </div>
@@ -417,7 +418,7 @@ ida伪代码分析main 函数负责调用菜单函数以及各个操作函数，
       
         
         
-          <img data-src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】原神-芙芙.png" data-sizes="auto" alt="Earth靶机渗透" class="lazyload">
         
       
     </div>
@@ -452,7 +453,7 @@ ida伪代码分析main 函数负责调用菜单函数以及各个操作函数，
       
         
         
-          <img data-src="/covers/【哲风壁纸】光带-卡提希娅-少女.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】中野二乃-五等分.png" data-sizes="auto" alt="ret2syscall" class="lazyload">
         
       
     </div>
@@ -506,7 +507,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】剑客-动漫角色.png" data-sizes="auto" alt="ret2libc" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-动漫-动漫壁纸.png" data-sizes="auto" alt="ret2libc" class="lazyload">
         
       
     </div>
@@ -539,7 +540,7 @@ execve的系统调用号
       
         
         
-          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】4K-剪影-动漫少女.png" data-sizes="auto" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -572,7 +573,7 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
       
         
         
-          <img data-src="/covers/【哲风壁纸】守岸-鸣潮.png" data-sizes="auto" alt="栈溢出" class="lazyload">
+          <img data-src="/covers/【哲风壁纸】jk-忍者鞋-手绘.png" data-sizes="auto" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -634,7 +635,7 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
     
       <div>
         <span class="icon-brush"></span>
-        9.5k
+        9.4k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
         00:36
