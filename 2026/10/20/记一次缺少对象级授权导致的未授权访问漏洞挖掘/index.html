@@ -1,0 +1,1129 @@
+
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+    
+      data-theme-mode="auto"
+    
+  >
+  <head>
+  
+  <meta charset="utf-8">
+  
+
+  
+
+  
+
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
+  
+  <title>
+    记一次缺少对象级授权导致的未授权访问漏洞挖掘 |
+    
+    淋着雨
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+  
+  
+    <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  
+  
+    
+<link rel="stylesheet" href="../../../../css/loader.css">
+
+  
+  
+    <meta name="description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&#x2F;金币付费墙">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次缺少对象级授权导致的未授权访问漏洞挖掘">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/index.html">
+<meta property="og:site_name" content="淋着雨">
+<meta property="og:description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&#x2F;金币付费墙">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image1.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image2.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image3.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image4.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image5.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image6.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image7.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image8.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image9.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image10.webp">
+<meta property="article:published_time" content="2026-10-20T14:44:11.000Z">
+<meta property="article:modified_time" content="2026-10-20T16:16:02.258Z">
+<meta property="article:author" content="淋着雨">
+<meta property="article:tag" content="未授权访问">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image1.webp">
+  
+  
+  
+    <link rel="shortcut icon" href="../../../../images/favicon.ico">
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
+  
+  
+  
+  
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" defer></script>
+
+  
+  
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+  
+  
+  
+    <style>
+  .article-entry .img-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 1.5em 0;
+  }
+  .article-entry .img-row > img,
+  .article-entry .img-row > a {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .article-entry .img-row img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  .article-entry .img-narrow {
+    width: 75%;
+    margin: 1.5em auto;
+  }
+  .article-entry .img-narrow img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    .article-entry .img-row { gap: 8px; }
+    .article-entry .img-narrow { width: 90%; }
+  }
+</style>
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+    
+    
+  <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+        
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+        
+      </div>
+      
+      
+        
+      
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  </div>
+  <script>
+    var loaderDone = false;
+    var endLoading = () => {
+      if (loaderDone) return;
+      loaderDone = true;
+      document.body.style.overflow = 'auto';
+      document.getElementById('loader').classList.add("loading");
+    }
+    // 优化：加载遮罩改为固定短时长（DOMContentLoaded + 500ms，最多 1.5s），不再被网络请求拖住
+    window.addEventListener('DOMContentLoaded', () => setTimeout(endLoading, 500));
+    setTimeout(endLoading, 1500);
+    document.getElementById('loader').addEventListener('click', endLoading);
+  </script>
+
+<div id="copy-tooltip" style="pointer-events: none; opacity: 0; transition: all 0.2s ease; position: fixed;top: 50%;left: 50%;z-index: 999;transform: translate(-50%, -50%);color: white;background: rgba(0, 0, 0, 0.5);padding: 10px 15px;border-radius: 10px;">
+</div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav">
+    
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../index.html">主页</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../archives">归档</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../friend">友链</a>
+        </span>
+      
+    
+    <a id="main-nav-toggle" class="nav-icon"></a>
+  </nav>
+  <nav id="sub-nav">
+    
+    
+    
+  </nav>
+  
+</div>
+<header id="header">
+  
+    
+      
+        <picture>
+          
+        </picture>
+        
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="记一次缺少对象级授权导致的未授权访问漏洞挖掘">
+        
+      
+    
+  
+  <div id="header-outer">
+    <div id="header-title">
+      
+        
+        
+          <span id="logo">
+            <h1 data-aos="slide-up">记一次缺少对象级授权导致的未授权访问漏洞挖掘</h1>
+          </span>
+        
+      
+      
+        
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+          
+        </h2>
+      
+    </div>
+  </div>
+</header>
+
+        <div id="content"  class="sidebar-right" >
+          <aside id="sidebar">
+  
+  <div class="sidebar-wrapper-container sticky">
+  
+    
+    
+  
+ 
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+      
+        
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%B8%80%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-hook"><span class="toc-number">3.1.</span> <span class="toc-text">思路一：客户端 hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%BA%8C%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E7%BC%BA%E5%A4%B1"><span class="toc-number">3.2.</span> <span class="toc-text">思路二：服务端对象级授权缺失</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+  
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">9</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">3</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">12</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+        
+      
+      
+        
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+        
+      
+    </div>
+  </div>
+  
+  <div class="sidebar-widget">
+  
+  </div>
+  
+  </div>
+  
+</aside>
+
+          <section id="main"><article id="post-记一次缺少对象级授权导致的未授权访问漏洞挖掘" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-10-20T14:44:11.000Z" itemprop="datePublished">2026-10-20</time>
+    <time style="display: none;" id="post-update-time">2026-10-21</time>
+  </span>
+  
+</div>
+
+      
+  <div class="article-category">
+    <a class="article-category-link" href="../../../../categories/%E6%BC%8F%E6%8C%96/" data-aos="zoom-in">漏挖</a>
+  </div>
+
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+      
+        <h2 id="免责声明"><a href="#免责声明" class="headerlink" title="免责声明"></a>免责声明</h2><p>本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。</p>
+<p>读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。</p>
+<h2 id="漏洞简述"><a href="#漏洞简述" class="headerlink" title="漏洞简述"></a>漏洞简述</h2><p>APP的 VIP&#x2F;金币付费墙仅由客户端 UI 依据 checkpoint（免费集数）实现；服务端在剧场详情接口中，对超出 checkpoint 的全部付费剧集，向任何普通登录用户原样下发可公开播放的 CDN 直链（son_video_url，无签名、无过期、无用户绑定），攻击者无需支付、无需 root、无需 Hook，即可提取并下载&#x2F;播放整部付费短剧。</p>
+<h2 id="完整过程"><a href="#完整过程" class="headerlink" title="完整过程"></a>完整过程</h2><p>测试对象为一个短剧APP，该APP设置有付费剧集，想要观看需要开通VIP会员、充值虚拟币或看广告解锁一定数量剧集。那能否通过hook或者绕过校验的方式获得VIP权限呢？</p>
+<h3 id="思路一：客户端-hook"><a href="#思路一：客户端-hook" class="headerlink" title="思路一：客户端 hook"></a>思路一：客户端 hook</h3><p>检查 APP 加固情况，发现未加壳，直接提取安装包，用 jadx 进行反编译。</p>
+<div class="img-narrow">
+  <img src="image1.webp" alt="查看加固信息">
+</div>
+
+<p><img src="image2.webp" alt="jadx反编译"></p>
+<p>在 com\XXX\XXX\app\util\AESGCMDecryption.java 中可见硬编码密钥及 decrypt 算法，借助AI写出解密脚本。</p>
+<p><img src="image3.webp" alt="硬编码密钥及加密算法"></p>
+<p>经过测试，fridahook 可以直接拿到VIP权限即可观看所有付费剧集，但是这种方式需要特定条件：一是一部 root 并安装了 fridaserver 的手机，二是手机必须连接着电脑并运行 fridahook 脚本。虽然我们能够绕过该APP的反调试，但是实际利用条件较为苛刻，难以造成实质性危害。</p>
+<h3 id="思路二：服务端对象级授权缺失"><a href="#思路二：服务端对象级授权缺失" class="headerlink" title="思路二：服务端对象级授权缺失"></a>思路二：服务端对象级授权缺失</h3><p>为了直观看清在点击APP的过程中发生了什么，在电脑端用 adb 打开手机端的 fridaserver，另一个终端窗口运行反调试脚本以及明文打印脚本。</p>
+<p><img src="image4.webp" alt="手机端frida"></p>
+<p>在手机APP上点击首页，成功捕获到首页请求明文，说明脚本工作正常。</p>
+<p><img src="image5.webp" alt="解密明文"></p>
+<p>以非 VIP 账号登录并打开任意付费剧集，在运行 frida 脚本的终端中查看 [DEC] 块输出：arg2 为密钥，PLAINTEXT 为解密后的 JSON 数据（其中 theaters[].son_video_url 含付费剧集直链）。</p>
+<div class="img-row">
+  <img src="image6.webp" alt="付费剧集">
+  <img src="image7.webp" alt="提示充值">
+</div>
+
+<p><img src="image8.webp" alt="泄露付费直链"></p>
+<p>访问付费直链，修改链接中最后一级 {集数}.mp4 中的集数即可直接观看对应剧集，不论这一集是否需要付费。</p>
+<p><img src="image9.webp" alt="访问付费直链"></p>
+<p>而APP分享短剧时生成的链接（形如<code>https://XXX.com/share-video/index.html?theater_parent_id=2620&amp;app_id=7&amp;channel=wechat</code>）中则出现了对应短剧的 theater_parent_id 值，通过构造<code>https://XXX.com/v1/share/tms/theater_parent?theater_parent_id=2662&amp;app_id=7</code>这样的curl请求即可拿到对应短剧的剧集直链，即可免费观看任意短剧的任意付费剧集。</p>
+<p><img src="image10.webp" alt="获取短剧id"></p>
+<h2 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h2><ol>
+<li><strong>付费内容零成本泄露</strong>：任意普通登录账号即可从剧场详情接口拿到全部付费剧集的可播放直链，绕过 VIP、金币和广告解锁，直接观看或下载整部短剧，直接蚕食平台的会员与付费收入。</li>
+<li><strong>可脚本化、批量利用</strong>：利用过程无需 root、无需 Hook，也不依赖特定客户端版本；攻击者只需维持一个普通账号，遍历 <code>theater_parent_id</code> 即可批量拉取全站短剧的付费资源，成本极低，且平台难以控制影响范围。</li>
+<li><strong>直链不受控，传播难回收</strong>：<code>son_video_url</code> 无签名、无过期时间、不绑定用户，一旦泄露即可长期有效并跨用户传播，容易被第三方站点盗链或聚合。平台无法通过封禁单个账号止损，还需承担额外的 CDN 带宽成本。</li>
+<li><strong>版权与商业风险</strong>：付费内容被批量抓取后可能流入盗版渠道，影响版权方合作与平台声誉，对以付费分账为主要收入模式的短剧业务影响尤为明显。</li>
+</ol>
+<h2 id="修复建议"><a href="#修复建议" class="headerlink" title="修复建议"></a>修复建议</h2><ol>
+<li><strong>服务端补齐剧集级鉴权（根本修复）</strong>：剧场详情、选集与分享接口在返回剧集信息前，须按当前登录用户对每一集的 VIP&#x2F;购买&#x2F;解锁状态进行校验；超出 checkpoint 的付费集只返回标题、集数等展示信息，不下发可播放地址。客户端付费墙只能用于展示，不能作为权限边界。</li>
+<li><strong>播放地址改为短时效签名 URL</strong>：不要直接下发长期有效的 CDN 直链。由服务端签发绑定 <code>user_id</code>、<code>episode_id</code>、过期时间与签名的播放 token 或签名 URL，播放时由 CDN 校验；有效期尽量短，并限制单账号的并发与请求频次。</li>
+<li><strong>分享接口做对象级授权</strong>：<code>theater_parent</code> 接口应校验请求者是否有权访问该剧场，或仅返回公开的预览信息；对可枚举 ID 增加归属校验、频率限制和异常遍历风控，避免「分享」接口成为全站数据导出入口。</li>
+<li><strong>CDN 侧启用防盗链</strong>：为点播地址开启 URL 鉴权或 Token 鉴权，避免直链被第三方长期引用；对已泄露的资源可轮换密钥或下架处理。</li>
+<li><strong>密钥与客户端加固（辅助措施）</strong>：修复 <code>AESGCMDecryption</code> 中硬编码密钥的问题，改为按版本&#x2F;设备动态下发，并配合代码混淆与完整性校验。该措施能提高分析成本，但不能替代服务端鉴权。</li>
+<li><strong>修复验证</strong>：用普通非 VIP 账号重放原请求，确认响应中不再包含付费集的 <code>son_video_url</code>；篡改 <code>theater_parent_id</code> 访问未授权剧场时应返回 403 或无数据；已签发的旧直链应在有效期内失效。</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/" rel="tag">未授权访问</a></li></ul>
+
+
+    </footer>
+  </div>
+  
+  <nav id="article-nav" data-aos="fade-up">
+    
+    
+    
+    <div class="article-nav-link-wrap right">
+      
+        
+        
+          <img src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.webp" loading="lazy" decoding="async" alt="XEE漏洞利用" class="lazyload">
+        
+      
+      <a href="/2026/07/20/XEE%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+        
+          XEE漏洞利用
+        
+      </h3>
+    </div>
+    
+  </nav>
+
+
+</article>
+
+
+
+
+
+
+
+
+
+  <section id="comments" data-aos="fade-up">
+    <div class="comment-header">
+      
+      
+        
+      
+      <h2 class="comment-title">说些什么吧！</h2>
+      <div class="comment-selector">
+        <div class="comment-selector-wrap">
+            
+            <div class="selector-item" data-selector="giscus">
+              <span>giscus</span>
+            </div>
+            
+        </div>
+      </div>
+    </div>
+    <div class="comment-content">
+      
+        <div class="comment giscus-comment" data-aos="fade-up"
+          id="giscus-comment">
+        </div>
+      
+    </div>
+  </section>
+
+
+</section>
+        </div>
+        <footer id="footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    
+    <div>
+      <span class="icon-copyright"></span>
+      
+      
+      
+        2020-2026
+      
+      <span class="footer-info-sep rotate"></span>
+      淋着雨
+    </div>
+    
+      <div>
+        基于&nbsp;<a href="https://hexo.io/" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a>&nbsp;
+        Theme.<a href="https://github.com/D-Sketon/hexo-theme-reimu" rel="noopener external nofollow noreferrer" target="_blank">Reimu</a>
+      </div>
+    
+    
+      <div>
+        <span class="icon-brush"></span>
+        11k
+        &nbsp;|&nbsp;
+        <span class="icon-coffee"></span>
+        00:41
+      </div>
+    
+    
+    
+    
+    
+      <div>
+        <span class="icon-eye"></span>
+        <span id="busuanzi_container_site_pv">总访问量&nbsp;<span id="busuanzi_value_site_pv"></span></span>
+        &nbsp;|&nbsp;
+        <span class="icon-user"></span>
+        <span id="busuanzi_container_site_uv">总访客量&nbsp;<span id="busuanzi_value_site_uv"></span></span>
+      </div>
+    
+  </div>
+</footer>
+
+        
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav">
+  <div class="sidebar-wrap">
+    
+      
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%B8%80%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-hook"><span class="toc-number">3.1.</span> <span class="toc-text">思路一：客户端 hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%BA%8C%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E7%BC%BA%E5%A4%B1"><span class="toc-number">3.2.</span> <span class="toc-text">思路二：服务端对象级授权缺失</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+  
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">9</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">3</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">12</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+      
+    
+  </div>
+  
+    
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+    
+  
+</nav>
+
+    </div>
+    
+    
+    
+    
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+  
+<script src="../../../../js/aos.js" defer></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+
+<script src="../../../../js/pjax_script.js" data-pjax defer></script>
+
+
+
+
+
+
+
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous" defer></script>
+
+  <script>
+    var fireworkInit = () => {
+      window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["var(--purple-1)","var(--purple-2)","var(--purple-3)","var(--purple-4)"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["var(--purple-0)"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireworkInit);
+    } else {
+      fireworkInit();
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+    
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "淋着雨",
+          title: "记一次缺少对象级授权导致的未授权访问漏洞挖掘",
+          url: "http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/",
+          excerpt: "",
+          description: "",
+          stripContent: "免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&amp;#x2F;金币付费墙仅由客户端 UI 依据 checkpoint（免费集数）实现；服务端在剧场详情接口中，对超出 che",
+          date: "Tue Oct 20 2026 22:44:11 GMT+0800",
+          updated: "Wed Oct 21 2026 00:16:02 GMT+0800",
+          cover: "/images/bannner.webp",
+        };
+      </script>
+       
+    
+    
+      
+        
+<script src="../../../../js/insert_highlight.js" data-pjax></script>
+
+        
+      
+    
+    
+      <script type="module" data-pjax>
+        const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+        
+        const pswp = () => {
+          if (_$$('.article-entry a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-entry',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          if(_$$('.article-gallery a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-gallery',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          window.lightboxStatus = 'done';
+          window.removeEventListener('lightbox:ready', pswp);
+        }
+        if(window.lightboxStatus === 'ready') {
+          pswp()
+        } else {
+          window.addEventListener('lightbox:ready', pswp);
+        }
+      </script>
+      
+        
+
+
+
+
+
+
+
+
+<script data-pjax>
+  var loadScript = (src, integrity) => {
+    const script = document.createElement('script');
+    script.src = src;
+    if (integrity) script.integrity = integrity;
+    script.crossOrigin = 'anonymous';
+    return script;
+  };
+
+  var commentConfigKeys = ['valine', 'waline', 'twikoo', 'gitalk', 'giscus'];
+  var commentConfig = {
+    valine: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.valine-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/valine@1.5.1/dist/Valine.min.js',
+          'sha384-3ma91AExDeMAZ1rjTjaP8V2A2obQE+s5ltKRwYlwdpArz9xVbp0tF3b0VV2ACNPn'
+        );
+        script.onload = () => {
+          var GUEST_INFO = ['nick', 'mail', 'link'];
+          var guest_info = 'nick,mail,link'.split(',').filter((item) => {
+            return GUEST_INFO.indexOf(item) > -1
+          });
+          var recordIP = JSON.parse('true');
+          var highlight = JSON.parse('true');
+          var visitor = JSON.parse('false');
+          var serverURLs = undefined;
+
+          if (window.Valine) {
+            new Valine({
+              el: '.valine-comment',
+              appId: "",
+              appKey: "",
+              placeholder: "Just go go",
+              pageSize: '10',
+              avatar: 'mp',
+              lang: document.documentElement.lang || 'en',
+              recordIP: recordIP,
+              highlight: highlight,
+              visitor: visitor,
+              requiredFields: guest_info,
+              path: window.location.pathname,
+              serverURLs
+            });
+          }
+        };
+        document.head.appendChild(script);
+      }
+    },
+    waline: {
+      enable: false,
+      load: async () => {
+        const container = document.querySelector('.waline-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        let walineInit;
+        const walineCdn = 'https://npm.webcache.cn/@waline/client@2.15.8/dist/waline.mjs';
+        const walineIntegrity = 'sha384-9sbqJjrfGjbkI6/PI4nU/MvBfEmkkPC4YK9I4zBeMIf1CVCZdCMH/KinBEAZII/5';
+
+        const module = await safeImport(walineCdn, walineIntegrity);
+        walineInit = module.init;
+
+        window.walineInstance = walineInit({
+          el: '.waline-comment',
+          serverURL: '',
+          lang: document.documentElement.lang || 'en',
+          locale: {},
+          emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus","https://unpkg.com/@waline/emojis@1.2.0/bilibili","https://unpkg.com/@waline/emojis@1.2.0/qq","https://unpkg.com/@waline/emojis@1.2.0/tieba","https://unpkg.com/@waline/emojis@1.2.0/tw-emoji"],
+          meta: ["nick","mail","link"],
+          requiredMeta: ["nick","mail"],
+          wordLimit: JSON.parse('0'),
+          comment: true,
+          pageSize: JSON.parse('10'),
+          dark: 'html[data-theme="dark"]',
+          pageview: JSON.parse('true'),
+        });
+      }
+    },
+    twikoo: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.twikoo-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/twikoo@1.6.44/dist/twikoo.all.min.js',
+          'sha384-kwWLC0HjeZZnVPqCJ1AncI8tsk+kQqF9TbAmCclcc9Z0hGkfgHRzeQZxmdmZhE0K'
+        );
+
+        script.onload = () => {
+          if (window.twikoo) {
+            twikoo.init({
+              envId: '',
+              el: '.twikoo-comment',
+              region: '',
+              lang: document.documentElement.lang || 'en',
+            });
+
+            twikoo.getCommentsCount({
+              envId: '',
+              region: '',
+              urls: [
+                '/friend/index.html'
+              ],
+              includeReply: false
+            }).then((res) => {
+              _$('.twikoo-comment-count').innerText = res[0].count;
+            }).catch((err) => {
+              console.error(err);
+            });
+          }
+        } 
+        document.head.appendChild(script);
+      }
+    },
+    gitalk: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.gitalk-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/gitalk@1.8.0/dist/gitalk.min.js',
+          'sha384-kspnZUWBoSWwoJHa0hBCXYbHGbhvU/lcEH5O8eVbSDhbPwsiVUTp/aGX/z/5EuMA'
+        );
+
+        script.onload = () => {
+          if (false) {
+            const md5Script = loadScript(
+              'https://npm.webcache.cn/blueimp-md5@2.19.0/js/md5.min.js',
+              'sha384-JmVtRz6RWiXnA14QbIOJzPuU3MidULOpBP66deeLLyyoF4Tr/gZlbkHkL6vTthxH'
+            );
+            md5Script.onload = initGitalk;
+            document.head.appendChild(md5Script);
+          } else {
+            initGitalk();
+          }
+        }
+        document.head.appendChild(script);
+
+        function initGitalk() {
+          var gitalkId = location.pathname;
+          var gitalk = new Gitalk({
+            clientID: '',
+            clientSecret: '',
+            repo: '',
+            owner: '',
+            admin: null,
+            id: gitalkId,
+            distractionFreeMode: false,
+            language: document.documentElement.lang || 'en',
+          })
+          gitalk.render('gitalk-comment');
+        }
+      }
+    },
+    giscus: {
+      enable: true,
+      load: () => {
+        const container = document.querySelector('.giscus-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        // 删除可能已存在的 giscus 脚本和 iframe
+        const existingScript = container.querySelector('script[src*="giscus.app/client.js"]');
+        if (existingScript) existingScript.remove();
+        const existingFrame = document.querySelector('iframe.giscus-frame');
+        if (existingFrame) existingFrame.remove();
+
+        const giscusScript = document.createElement('script');
+        const domMode = document.documentElement.getAttribute("data-theme");
+
+        const docLang = document.documentElement.lang || 'en';
+        const langBase = docLang.split('-')[0];
+        const supportedLangs = ['ar', 'be', 'bg', 'ca', 'cs', 'da', 'de', 'en', 
+        'eo', 'es', 'eu', 'fa', 'fr', 'gr', 'hbs', 'he', 'hu', 'id', 'it', 'ja', 
+        'kh', 'ko', 'nl', 'pl', 'pt', 'ro', 'ru', 'th', 'tr', 'uk', 'uz', 'vi', 'zh-CN', 'zh-HK', 'zh-TW'];
+        const giscusLang = supportedLangs.includes(docLang) ? docLang : supportedLangs.includes(langBase) ? langBase : 'en';
+
+        giscusScript.src = 'https://giscus.app/client.js';
+        giscusScript.setAttribute('data-repo', '1t01x1w4/1t01x1w4.github.io');
+        giscusScript.setAttribute('data-repo-id', 'R_kgDORN3jAg');
+        giscusScript.setAttribute('data-category', 'General'); 
+        giscusScript.setAttribute('data-category-id', 'DIC_kwDORN3jAs4C2arB');
+        giscusScript.setAttribute('data-mapping', '0');
+        giscusScript.setAttribute('data-strict', '0');
+        giscusScript.setAttribute('data-reactions-enabled', '1');
+        giscusScript.setAttribute('data-emit-metadata', '0');
+        giscusScript.setAttribute('data-input-position', 'bottom');
+        giscusScript.setAttribute('data-theme', domMode === 'dark' ? 'dark' : 'light');
+        giscusScript.setAttribute('data-lang', giscusLang);
+        giscusScript.setAttribute('crossorigin', 'anonymous');
+        giscusScript.async = true;
+        container.appendChild(giscusScript);
+        document.body.addEventListener('light-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'light' } } }, 'https://giscus.app');
+        });
+        document.body.addEventListener('dark-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'dark' } } }, 'https://giscus.app');
+        });
+      }
+    }
+  }
+  commentConfig.enable = commentConfigKeys.some(key => commentConfig[key].enable);
+
+  var defaultComment = '';
+  if (commentConfig.enable) {
+    // 1. 首先检查localStorage中是否有保存的评论类型
+    var savedCommentType = localStorage.getItem('commentType');
+    
+    // 2. 如果localStorage中有值且对应的评论系统可用，就使用它
+    if (savedCommentType) {
+      if (commentConfig[savedCommentType]?.enable) {
+        defaultComment = savedCommentType;
+      }
+    }
+    
+    // 3. 如果localStorage无效，检查配置的默认评论系统
+    if (!defaultComment) {
+      var configDefault = 'waline';
+      if (commentConfig[configDefault]?.enable) {
+        defaultComment = configDefault;
+      }
+    }
+    
+    // 4. 如果前两项都无效，按指定顺序找到第一个可用的评论系统
+    if (!defaultComment) {
+      defaultComment = commentConfigKeys.find(sys => commentConfig[sys].enable) || '';
+    }
+  }
+  function loadComments() {
+    if (!commentConfig.enable) return;
+    // 评论组件加载状态跟踪
+    const loadedComments = {
+      valine: false,
+      waline: false,
+      twikoo: false,
+      gitalk: false,
+      giscus: false
+    };
+
+    // 隐藏所有评论容器
+    const hideAllComments = () => {
+      const commentContainers = document.querySelectorAll('.comment');
+      commentContainers.forEach(container => {
+        container.style.display = 'none';
+      });
+    };
+
+    // 按需加载评论系统
+    const loadCommentSystem = (type) => {
+      if (loadedComments[type]) {
+        // 如果已加载，只需显示对应容器
+        document.querySelector(`.${type}-comment`).style.display = 'block';
+        return;
+      }
+
+      // 根据类型加载对应的脚本
+      commentConfig[type]?.load();
+      loadedComments[type] = true;
+    };
+
+    // 评论组件选择器
+    const changeActiveCommentItems = (item) => {
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let i = 0; i < commentItems.length; i++) {
+        commentItems[i].classList.remove('active');
+      }
+      item.classList.add('active');
+
+      // 获取要加载的评论系统类型
+      const commentType = item.getAttribute('data-selector');
+
+      // 隐藏所有评论系统
+      hideAllComments();
+
+      // 加载选中的评论系统
+      loadCommentSystem(commentType);
+    };
+
+    const commentInit = () => {
+      // 评论组件选择器点击事件
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let item of commentItems) {
+        item.addEventListener('click', () => {
+          // 保存选择器状态
+          const commentType = item.getAttribute('data-selector');
+          window.localStorage.setItem('commentType', commentType);
+          // 切换选中状态
+          changeActiveCommentItems(item);
+        });
+      }
+
+      // 检查是否需要加载默认评论系统
+      if (defaultComment) {
+        const defaultSelectorItem = document.querySelector(`[data-selector="${defaultComment}"]`);
+        if (!defaultSelectorItem) return;
+        defaultSelectorItem.style.display = 'block';
+        defaultSelectorItem.classList.add('active');
+        loadCommentSystem(defaultComment);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', commentInit);
+    } else {
+      commentInit();
+    }
+  };
+  loadComments();
+</script>
+
+      
+    
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.9.2' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+  
+<script src="https://npm.webcache.cn/busuanzi@2.3.0/bsz.pure.mini.js" integrity="sha384-0M75wtSkhjIInv4coYlaJU83+OypaRCIq2SukQVQX04eGTCBXJDuWAbJet56id+S" crossorigin="anonymous" async></script>
+
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+
+    
+  </body>
+  </html>
+

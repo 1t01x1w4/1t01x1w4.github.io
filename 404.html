@@ -67,6 +67,42 @@
   
   
   
+    <style>
+  .article-entry .img-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 1.5em 0;
+  }
+  .article-entry .img-row > img,
+  .article-entry .img-row > a {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .article-entry .img-row img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  .article-entry .img-narrow {
+    width: 75%;
+    margin: 1.5em auto;
+  }
+  .article-entry .img-narrow img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    .article-entry .img-row { gap: 8px; }
+    .article-entry .img-narrow { width: 90%; }
+  }
+</style>
+
+  
 <meta name="generator" content="Hexo 8.1.1"></head>
 
 <body>
