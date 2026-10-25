@@ -244,7 +244,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">9</div>
+    <div class="sidebar-state-number">10</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -315,14 +315,47 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="../../2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
+      <a class="post-link" href="../../2026/02/15/ret2libc/" aria-label="ret2libc"></a>
     
     
     <div class="post-cover left">
       
         
         
-          <img src="/covers/【哲风壁纸】jk-忍者鞋-手绘.webp" loading="lazy" decoding="async" alt="ret2shellcode" class="lazyload">
+          <img src="/covers/【哲风壁纸】原神-芙芙.webp" loading="lazy" decoding="async" alt="ret2libc" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-02-15</span>
+        
+        <span><span class="icon-pencil"></span>1k 字</span>
+        <span><span class="icon-clock"></span>4 分钟</span>
+      </div>
+      <h2 class="post-title">ret2libc</h2>
+      <article class="post-article">
+        
+          libc是C语言中的一个标准库，里面存放了像puts()、system()这样的函数，程序通过动态连接 libc，便可以调用库中的函数进行使用。libc 中存在got（全局偏移表）和plt（进程链接表），其中 plt 存放的是进入这个函数的地址，而 got 表中存放的是这个函数的真正地址。
+程序中每次调用函数标准函数，实际上就是跳转到该函数的 plt 表地址，如果 plt 表中已经有函数地址了，就可以直接使用；如果 plt 表中并没有该函数的地址，那么便会通过一种映射关系跳转到 got 表中去查找函数的真实地址，链接并返回调用。函数在 libc 中的地址关系是这样的：真实地址 &amp;#x3D; l
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap right" data-aos="fade-up">
+    
+      <a class="post-link" href="../../2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
+    
+    
+    <div class="post-cover right">
+      
+        
+        
+          <img src="/covers/【哲风壁纸】光带-卡提希娅-少女.webp" loading="lazy" decoding="async" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -346,16 +379,16 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="../../2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img src="/covers/【哲风壁纸】CG插画-CG美女插画.webp" loading="lazy" decoding="async" alt="栈溢出" class="lazyload">
+          <img src="/covers/【哲风壁纸】中野二乃-五等分.webp" loading="lazy" decoding="async" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -421,10 +454,10 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
     
       <div>
         <span class="icon-brush"></span>
-        11k
+        12.7k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:41
+        00:47
       </div>
     
     
@@ -461,7 +494,7 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">9</div>
+    <div class="sidebar-state-number">10</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>

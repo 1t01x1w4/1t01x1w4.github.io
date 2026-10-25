@@ -17,7 +17,7 @@
   <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
   
   <title>
-    记一次缺少对象级授权导致的未授权访问漏洞挖掘 |
+    记一次漏洞挖掘之actuator未授权访问 |
     
     淋着雨
   </title>
@@ -35,29 +35,27 @@
 
   
   
-    <meta name="description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&#x2F;金币付费墙">
+    <meta name="description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述Web 服务端未对 Spring Bo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记一次缺少对象级授权导致的未授权访问漏洞挖掘">
-<meta property="og:url" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/index.html">
+<meta property="og:title" content="记一次漏洞挖掘之actuator未授权访问">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/index.html">
 <meta property="og:site_name" content="淋着雨">
-<meta property="og:description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&#x2F;金币付费墙">
+<meta property="og:description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述Web 服务端未对 Spring Bo">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image1.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image2.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image3.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image4.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image5.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image6.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image7.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image8.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image9.webp">
-<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image10.webp">
-<meta property="article:published_time" content="2026-10-20T14:44:11.000Z">
-<meta property="article:modified_time" content="2026-10-20T16:16:02.258Z">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image1.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image2.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image3.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image4.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image5.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image6.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image7.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image8.webp">
+<meta property="article:published_time" content="2026-10-25T08:45:27.000Z">
+<meta property="article:modified_time" content="2026-10-25T09:27:51.860Z">
 <meta property="article:author" content="淋着雨">
 <meta property="article:tag" content="未授权访问">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/image1.webp">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/image1.webp">
   
   
   
@@ -214,7 +212,7 @@
           
         </picture>
         
-          <img  fetchpriority="high" src="/images/bannner.webp" alt="记一次缺少对象级授权导致的未授权访问漏洞挖掘">
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="记一次漏洞挖掘之actuator未授权访问">
         
       
     
@@ -225,7 +223,7 @@
         
         
           <span id="logo">
-            <h1 data-aos="slide-up">记一次缺少对象级授权导致的未授权访问漏洞挖掘</h1>
+            <h1 data-aos="slide-up">记一次漏洞挖掘之actuator未授权访问</h1>
           </span>
         
       
@@ -255,7 +253,7 @@
           <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%B8%80%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-hook"><span class="toc-number">3.1.</span> <span class="toc-text">思路一：客户端 hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%BA%8C%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E7%BC%BA%E5%A4%B1"><span class="toc-number">3.2.</span> <span class="toc-text">思路二：服务端对象级授权缺失</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
   
 </div>
 </div>
@@ -267,7 +265,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">9</div>
+    <div class="sidebar-state-number">10</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -338,13 +336,13 @@
   
 </aside>
 
-          <section id="main"><article id="post-记一次缺少对象级授权导致的未授权访问漏洞挖掘" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+          <section id="main"><article id="post-记一次漏洞挖掘之actuator未授权访问" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-inner" data-aos="fade-up">
     <div class="article-meta">
       <div class="article-date">
   <span class="article-date-link icon-calendar" data-aos="zoom-in">
-    <time datetime="2026-10-20T14:44:11.000Z" itemprop="datePublished">2026-10-20</time>
-    <time style="display: none;" id="post-update-time">2026-10-21</time>
+    <time datetime="2026-10-25T08:45:27.000Z" itemprop="datePublished">2026-10-25</time>
+    <time style="display: none;" id="post-update-time">2026-10-25</time>
   </span>
   
 </div>
@@ -365,47 +363,66 @@
       
         <h2 id="免责声明"><a href="#免责声明" class="headerlink" title="免责声明"></a>免责声明</h2><p>本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。</p>
 <p>读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。</p>
-<h2 id="漏洞简述"><a href="#漏洞简述" class="headerlink" title="漏洞简述"></a>漏洞简述</h2><p>APP的 VIP&#x2F;金币付费墙仅由客户端 UI 依据 checkpoint（免费集数）实现；服务端在剧场详情接口中，对超出 checkpoint 的全部付费剧集，向任何普通登录用户原样下发可公开播放的 CDN 直链（son_video_url，无签名、无过期、无用户绑定），攻击者无需支付、无需 root、无需 Hook，即可提取并下载&#x2F;播放整部付费短剧。</p>
-<h2 id="完整过程"><a href="#完整过程" class="headerlink" title="完整过程"></a>完整过程</h2><p>测试对象为一个短剧APP，该APP设置有付费剧集，想要观看需要开通VIP会员、充值虚拟币或看广告解锁一定数量剧集。那能否通过hook或者绕过校验的方式获得VIP权限呢？</p>
-<h3 id="思路一：客户端-hook"><a href="#思路一：客户端-hook" class="headerlink" title="思路一：客户端 hook"></a>思路一：客户端 hook</h3><p>检查 APP 加固情况，发现未加壳，直接提取安装包，用 jadx 进行反编译。</p>
-<div class="img-narrow">
-  <img src="image1.webp" alt="查看加固信息">
-</div>
+<h2 id="漏洞简述"><a href="#漏洞简述" class="headerlink" title="漏洞简述"></a>漏洞简述</h2><p>Web 服务端未对 Spring Boot 运维监控接口做身份认证与访问控制，攻击者无需登录即可直接访问运维管理端点，读取应用的环境配置、接口路由、配置项和 Bean 结构等运行信息，并且内存转储文件能够被完整下载。内存转储文件一旦被获取，其中的会话凭证、用户手机号与姓名等个人信息、数据库口令以及第三方密钥将直接泄露。</p>
+<h2 id="完整过程"><a href="#完整过程" class="headerlink" title="完整过程"></a>完整过程</h2><ol>
+<li>测试对象为一个电影购票小程序，通过反编译查看文件结构可以大致得知该小程序本身仅承担入口和容器职责，实际业务逻辑位于网页及其调用的后端接口。</li>
+</ol>
+<p>在小程序反编译后的 page-frame.html 下找 web-view，会看到类似编译产物。</p>
+<p><img src="image1.webp" alt="web-view"></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> m9=<span class="keyword">function</span>(<span class="params">e,s,r,gg</span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> z=<span class="title function_">gz$gwx_10</span>()</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">var</span> fWD=<span class="title function_">_mz</span>(z,<span class="string">&#x27;web-view&#x27;</span>,[<span class="string">&#x27;binderror&#x27;</span>,<span class="number">2</span>,<span class="string">&#x27;bindload&#x27;</span>,<span class="number">1</span>,<span class="string">&#x27;bindmessage&#x27;</span>,<span class="number">2</span>,<span class="string">&#x27;src&#x27;</span>,<span class="number">3</span>],[],e,s,gg)</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="image2.webp" alt="jadx反编译"></p>
-<p>在 com\XXX\XXX\app\util\AESGCMDecryption.java 中可见硬编码密钥及 decrypt 算法，借助AI写出解密脚本。</p>
-<p><img src="image3.webp" alt="硬编码密钥及加密算法"></p>
-<p>经过测试，fridahook 可以直接拿到VIP权限即可观看所有付费剧集，但是这种方式需要特定条件：一是一部 root 并安装了 fridaserver 的手机，二是手机必须连接着电脑并运行 fridahook 脚本。虽然我们能够绕过该APP的反调试，但是实际利用条件较为苛刻，难以造成实质性危害。</p>
-<h3 id="思路二：服务端对象级授权缺失"><a href="#思路二：服务端对象级授权缺失" class="headerlink" title="思路二：服务端对象级授权缺失"></a>思路二：服务端对象级授权缺失</h3><p>为了直观看清在点击APP的过程中发生了什么，在电脑端用 adb 打开手机端的 fridaserver，另一个终端窗口运行反调试脚本以及明文打印脚本。</p>
-<p><img src="image4.webp" alt="手机端frida"></p>
-<p>在手机APP上点击首页，成功捕获到首页请求明文，说明脚本工作正常。</p>
-<p><img src="image5.webp" alt="解密明文"></p>
-<p>以非 VIP 账号登录并打开任意付费剧集，在运行 frida 脚本的终端中查看 [DEC] 块输出：arg2 为密钥，PLAINTEXT 为解密后的 JSON 数据（其中 theaters[].son_video_url 含付费剧集直链）。</p>
-<div class="img-row">
-  <img src="image6.webp" alt="付费剧集">
-  <img src="image7.webp" alt="提示充值">
-</div>
+<p>继续看该页面对应的数据定义 gz$gwx_10：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">Z</span>([<span class="number">3</span>,<span class="string">&#x27;page-body&#x27;</span>])</span><br><span class="line"><span class="title function_">Z</span>([<span class="number">3</span>,<span class="string">&#x27;page-section page-section-gap&#x27;</span>])</span><br><span class="line"><span class="title function_">Z</span>([<span class="number">3</span>,<span class="string">&#x27;handleGetMessage&#x27;</span>])</span><br><span class="line"><span class="title function_">Z</span>([[<span class="number">7</span>],[<span class="number">3</span>,<span class="string">&#x27;webViewUrl&#x27;</span>]])</span><br><span class="line"><span class="title function_">Z</span>([<span class="number">3</span>,<span class="string">&#x27;height: 90%;&#x27;</span>])</span><br></pre></td></tr></table></figure>
 
-<p><img src="image8.webp" alt="泄露付费直链"></p>
-<p>访问付费直链，修改链接中最后一级 {集数}.mp4 中的集数即可直接观看对应剧集，不论这一集是否需要付费。</p>
-<p><img src="image9.webp" alt="访问付费直链"></p>
-<p>而APP分享短剧时生成的链接（形如<code>https://XXX.com/share-video/index.html?theater_parent_id=2620&amp;app_id=7&amp;channel=wechat</code>）中则出现了对应短剧的 theater_parent_id 值，通过构造<code>https://XXX.com/v1/share/tms/theater_parent?theater_parent_id=2662&amp;app_id=7</code>这样的curl请求即可拿到对应短剧的剧集直链，即可免费观看任意短剧的任意付费剧集。</p>
-<p><img src="image10.webp" alt="获取短剧id"></p>
-<h2 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h2><ol>
-<li><strong>付费内容零成本泄露</strong>：任意普通登录账号即可从剧场详情接口拿到全部付费剧集的可播放直链，绕过 VIP、金币和广告解锁，直接观看或下载整部短剧，直接蚕食平台的会员与付费收入。</li>
-<li><strong>可脚本化、批量利用</strong>：利用过程无需 root、无需 Hook，也不依赖特定客户端版本；攻击者只需维持一个普通账号，遍历 <code>theater_parent_id</code> 即可批量拉取全站短剧的付费资源，成本极低，且平台难以控制影响范围。</li>
-<li><strong>直链不受控，传播难回收</strong>：<code>son_video_url</code> 无签名、无过期时间、不绑定用户，一旦泄露即可长期有效并跨用户传播，容易被第三方站点盗链或聚合。平台无法通过封禁单个账号止损，还需承担额外的 CDN 带宽成本。</li>
-<li><strong>版权与商业风险</strong>：付费内容被批量抓取后可能流入盗版渠道，影响版权方合作与平台声誉，对以付费分账为主要收入模式的短剧业务影响尤为明显。</li>
+<p>原始 WXML 大致是：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;web-view src=<span class="string">&quot;&#123;&#123;webViewUrl&#125;&#125;&quot;</span> bindmessage=<span class="string">&quot;handleGetMessage&quot;</span> ... /&amp;gt;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>在 app-service.js 找字段赋值：</li>
+</ol>
+<p><img src="image2.webp" alt="app-service"></p>
+<p>总共找到8个页面，其中 pages&#x2F;start&#x2F;start.js 是主入口。</p>
+<p>关键点：<br>    - sourceType + id 决定加载哪个 H5 路由；<br>    - 没有参数时默认进 &#x2F;#&#x2F;selectCity 或 &#x2F;?iswx&#x3D;1&amp;startad&#x3D;1；<br>    - onShow 还会消费 getApp().webViewUrl，这是其他页面（如支付回跳）设置的全局地址。</p>
+<ol start="3">
+<li>在小程序反编译文件夹目录下用命令找到 web-view 加载的地址。</li>
+</ol>
+<p><img src="image3.webp" alt="地址"></p>
+<ol start="4">
+<li>通过 Burp 或浏览器抓取该网页加载的 JavaScript 文件，提取后端接口上下文路径 &#x2F;frontUIWebapp，根据 Spring Boot 的命名约定，打开无痕浏览器访问 &#x2F;frontUIWebapp&#x2F;actuator，确认返回 200 与 _links，说明管理端点对未认证用户开放，其中还泄露了 env、heapdump 这些危险端点。</li>
+</ol>
+<p><img src="image4.webp" alt="_links"></p>
+<p><img src="image5.webp" alt="危险端点"></p>
+<ol start="5">
+<li>访问 &#x2F;frontUIWebapp&#x2F;actuator&#x2F;health，可以看到 status 的值为 UP。</li>
+</ol>
+<p><img src="image6.webp" alt="health"></p>
+<ol start="6">
+<li>访问 &#x2F;frontUIWebapp&#x2F;actuator&#x2F;env，全局搜索 password，找到数据库账号名以及对应的默认脱敏的密码；并且 spring.redis.cluster.nodes 直接暴露了未脱敏的 Redis 节点。而password 显示为 ****** 不代表安全，即使配置页脱敏，heapdump 仍可从内存中读取明文口令。</li>
+</ol>
+<p><img src="image7.webp" alt="env"></p>
+<ol start="7">
+<li>在 powershell 中执行命令“curl.exe -sI <a target="_blank" rel="noopener" href="https://www.xxx.com/frontUIWebapp/actuator/heapdump%E2%80%9D%EF%BC%8CHEAD">https://www.XXX.com/frontUIWebapp/actuator/heapdump”，HEAD</a> 返回 200 且 Content-Type 为 application&#x2F;octet-stream，即证明服务端愿意向未认证用户返回该文件体。</li>
+</ol>
+<p><img src="image8.webp" alt="heapdump"></p>
+<h2 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h2><p>该漏洞本质是未授权访问导致的信息泄露，但泄露的内容恰好是系统最核心的凭据与业务数据，属于「单点入口、全链失守」型风险，综合评定为高危。具体危害可沿攻击链展开：</p>
+<ol>
+<li><strong>核心凭据泄露，可直接接管数据资产。</strong> heapdump 是 JVM 运行时的完整内存快照，spring.datasource 的账号口令、Redis 连接串、第三方 SDK 的 accessKey&#x2F;secretKey 在内存中均以明文形式存在，用 JDumpSpider、MAT 或 strings 即可批量提取。攻击者据此可直接连接数据库与缓存，读取、篡改、删除订单和用户数据；若 Redis 侧未做鉴权或存在弱口令，还能进一步通过写入计划任务、主从复制投毒等方式获取服务器权限，使风险从数据泄露升级为服务器失陷。</li>
+<li><strong>个人信息大规模泄露，触发合规责任。</strong> 内存中持有大量运行态数据：用户会话 Token、手机号、姓名、收货地址、购票与支付记录等。攻击者可批量导出后用于精准诈骗、撞库、账号盗用，属于《个人信息保护法》《数据安全法》明确要求上报的情形，同时难以满足等保对敏感数据访问控制的要求。</li>
+<li><strong>业务与资金安全受威胁。</strong> 该应用涉及微信小程序与支付回调，env 与 heapdump 中很可能包含微信 appsecret、支付商户密钥、短信服务密钥、对象存储 AK&#x2F;SK。攻击者可伪造支付结果通知实现 0 元购、调用短信接口实施短信轰炸并消耗账户余额、伪造小程序登录态接管账号，或直接拖取对象存储中的票券、证件等文件。</li>
+<li><strong>暴露内部攻击面，为后续渗透提供跳板。</strong> mappings 与 beans 给出全部接口路由和类结构，configprops、env 泄露内网地址、中间件版本与外部依赖配置，攻击者无需再盲扫即可定位未公开接口、后台管理地址与内网资产；health 返回 UP 则便于攻击者做资产测绘与批量筛选。这些信息显著降低后续利用成本。</li>
+<li><strong>攻击隐蔽，事后难以追溯。</strong> actuator 探测请求体量极小，仅 HEAD 请求就能确认 heapdump 可下载，常规 WAF 规则通常不会拦截，访问日志里表现为普通 GET，难以区分正常监控流量与恶意拉取。若未及时审计网关、Nginx 日志，可能在很长时间内都无法发现凭据已被取走。</li>
 </ol>
 <h2 id="修复建议"><a href="#修复建议" class="headerlink" title="修复建议"></a>修复建议</h2><ol>
-<li><strong>服务端补齐剧集级鉴权（根本修复）</strong>：剧场详情、选集与分享接口在返回剧集信息前，须按当前登录用户对每一集的 VIP&#x2F;购买&#x2F;解锁状态进行校验；超出 checkpoint 的付费集只返回标题、集数等展示信息，不下发可播放地址。客户端付费墙只能用于展示，不能作为权限边界。</li>
-<li><strong>播放地址改为短时效签名 URL</strong>：不要直接下发长期有效的 CDN 直链。由服务端签发绑定 <code>user_id</code>、<code>episode_id</code>、过期时间与签名的播放 token 或签名 URL，播放时由 CDN 校验；有效期尽量短，并限制单账号的并发与请求频次。</li>
-<li><strong>分享接口做对象级授权</strong>：<code>theater_parent</code> 接口应校验请求者是否有权访问该剧场，或仅返回公开的预览信息；对可枚举 ID 增加归属校验、频率限制和异常遍历风控，避免「分享」接口成为全站数据导出入口。</li>
-<li><strong>CDN 侧启用防盗链</strong>：为点播地址开启 URL 鉴权或 Token 鉴权，避免直链被第三方长期引用；对已泄露的资源可轮换密钥或下架处理。</li>
-<li><strong>密钥与客户端加固（辅助措施）</strong>：修复 <code>AESGCMDecryption</code> 中硬编码密钥的问题，改为按版本&#x2F;设备动态下发，并配合代码混淆与完整性校验。该措施能提高分析成本，但不能替代服务端鉴权。</li>
-<li><strong>修复验证</strong>：用普通非 VIP 账号重放原请求，确认响应中不再包含付费集的 <code>son_video_url</code>；篡改 <code>theater_parent_id</code> 访问未授权剧场时应返回 403 或无数据；已签发的旧直链应在有效期内失效。</li>
+<li>在网关&#x2F;WAF 封禁 &#x2F;actuator&#x2F;* 与 &#x2F;frontUIWebapp&#x2F;actuator&#x2F;*，返回 404。 </li>
+<li>关闭非必要端点，尤其是 heapdump、env、configprops、beans、mappings。 </li>
+<li>将 management 端口与业务端口分离，仅允许运维网段访问。 </li>
+<li>视为凭据已泄露：轮换数据库、Redis、微信、支付、短信、对象存储等密钥。 </li>
+<li>使旧会话 Token 失效，必要时强制用户重新登录。 </li>
+<li>审计网关、Nginx、WAF 访问日志，确认是否已有外部 IP 访问 heapdump 或 env。</li>
 </ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置修复示例（Spring Boot 2.x）</span></span><br><span class="line"><span class="comment"># 仅暴露健康检查 </span></span><br><span class="line">management.endpoints.web.exposure.include=health </span><br><span class="line"><span class="comment"># 显式关闭高风险端点 </span></span><br><span class="line">management.endpoint.heapdump.enabled=<span class="literal">false</span> </span><br><span class="line">management.endpoint.env.enabled=<span class="literal">false</span> </span><br><span class="line">management.endpoint.configprops.enabled=<span class="literal">false</span> </span><br><span class="line">management.endpoint.beans.enabled=<span class="literal">false</span> </span><br><span class="line">management.endpoint.mappings.enabled=<span class="literal">false</span> </span><br></pre></td></tr></table></figure>
 
+<p>如需保留监控能力，应将 management 绑定到独立端口并限制来源：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">management.server.port=18080 </span><br><span class="line">management.server.address=127.0.0.1 </span><br><span class="line"><span class="comment"># 或绑定到仅内网可达的地址 </span></span><br><span class="line"><span class="comment"># management.server.address=10.0.0.10 </span></span><br></pre></td></tr></table></figure>
       
     </div>
     <footer class="article-footer">
@@ -432,14 +449,14 @@
       
         
         
-          <img src="/covers/【哲风壁纸】CG插画-CG美女插画.webp" loading="lazy" decoding="async" alt="XEE漏洞利用" class="lazyload">
+          <img src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.webp" loading="lazy" decoding="async" alt="记一次漏洞挖掘之缺少对象级授权导致的未授权访问" class="lazyload">
         
       
-      <a href="/2026/07/20/XEE%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/"></a>
+      <a href="/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8B%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/"></a>
       <div class="article-nav-caption">后一篇</div>
       <h3 class="article-nav-title">
         
-          XEE漏洞利用
+          记一次漏洞挖掘之缺少对象级授权导致的未授权访问
         
       </h3>
     </div>
@@ -511,10 +528,10 @@
     
       <div>
         <span class="icon-brush"></span>
-        11k
+        12.7k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:41
+        00:47
       </div>
     
     
@@ -547,7 +564,7 @@
         <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
 <div class="sidebar-toc-wrapper toc-div-class" >
   
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%B8%80%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-hook"><span class="toc-number">3.1.</span> <span class="toc-text">思路一：客户端 hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E4%BA%8C%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E7%BC%BA%E5%A4%B1"><span class="toc-number">3.2.</span> <span class="toc-text">思路二：服务端对象级授权缺失</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
   
 </div>
 </div>
@@ -559,7 +576,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">9</div>
+    <div class="sidebar-state-number">10</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -697,13 +714,13 @@
       <script data-pjax>
         window.REIMU_POST = {
           author: "淋着雨",
-          title: "记一次缺少对象级授权导致的未授权访问漏洞挖掘",
-          url: "http://1t01x1w4.github.io/2026/10/20/%E8%AE%B0%E4%B8%80%E6%AC%A1%E7%BC%BA%E5%B0%91%E5%AF%B9%E8%B1%A1%E7%BA%A7%E6%8E%88%E6%9D%83%E5%AF%BC%E8%87%B4%E7%9A%84%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/",
+          title: "记一次漏洞挖掘之actuator未授权访问",
+          url: "http://1t01x1w4.github.io/2026/10/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bactuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/",
           excerpt: "",
           description: "",
-          stripContent: "免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述APP的 VIP&amp;#x2F;金币付费墙仅由客户端 UI 依据 checkpoint（免费集数）实现；服务端在剧场详情接口中，对超出 che",
-          date: "Tue Oct 20 2026 22:44:11 GMT+0800",
-          updated: "Wed Oct 21 2026 00:16:02 GMT+0800",
+          stripContent: "免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述Web 服务端未对 Spring Boot 运维监控接口做身份认证与访问控制，攻击者无需登录即可直接访问运维管理端点，读取应用的环境配置、",
+          date: "Sun Oct 25 2026 16:45:27 GMT+0800",
+          updated: "Sun Oct 25 2026 17:27:51 GMT+0800",
           cover: "/images/bannner.webp",
         };
       </script>
