@@ -244,7 +244,7 @@
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">10</div>
+    <div class="sidebar-state-number">11</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -252,7 +252,7 @@
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">12</div>
+    <div class="sidebar-state-number">13</div>
   </div>
 </div>
 <div class="sidebar-social">
@@ -315,10 +315,64 @@
       <div class="post-wrapper">
   <div class="post-wrap left" data-aos="fade-up">
     
-      <a class="post-link" href="../../2026/02/15/ret2libc/" aria-label="ret2libc"></a>
+      <a class="post-link" href="../../2026/03/13/ret2syscall/" aria-label="ret2syscall"></a>
     
     
     <div class="post-cover left">
+      
+        
+        
+          <img src="/covers/【哲风壁纸】剑客-动漫角色.webp" loading="lazy" decoding="async" alt="ret2syscall" class="lazyload">
+        
+      
+    </div>
+    <div class="post-info">
+      <div class="post-meta">
+        <span><span class="icon-calendar"></span>2026-03-13</span>
+        
+        <span><span class="icon-pencil"></span>535 字</span>
+        <span><span class="icon-clock"></span>2 分钟</span>
+      </div>
+      <h2 class="post-title">ret2syscall</h2>
+      <article class="post-article">
+        
+          ret2syscall 是很久之前就碰到的了，只不过当时的情况是不懂就直接找网上的 wp 糊弄着好像学会了，但其实并未入脑中。再一次碰到可以利用 ret2syscall 的题发现还是无法灵活处理，所以做此记录。ret2syscall，即返回到系统调用，通过设置相应寄存器的值并返回到系统调用地址（32位与64位略有区别）实现系统调用函数getshell。
+32位与64位下ret2syscall的区别
+
+
+特性
+32位(x86)
+64位(x64)
+
+
+
+触发系统调用的指令
+int 0x80
+syscall
+
+
+存放系统调用号的寄存器
+eax
+rax
+
+
+execve的系统调用号
+11(0x0b)
+
+        
+      </article>
+    </div>
+  </div>
+</div>
+      
+    
+      <div class="post-wrapper">
+  <div class="post-wrap right" data-aos="fade-up">
+    
+      <a class="post-link" href="../../2026/02/15/ret2libc/" aria-label="ret2libc"></a>
+    
+    
+    <div class="post-cover right">
       
         
         
@@ -346,16 +400,16 @@
       
     
       <div class="post-wrapper">
-  <div class="post-wrap right" data-aos="fade-up">
+  <div class="post-wrap left" data-aos="fade-up">
     
       <a class="post-link" href="../../2026/02/15/ret2shellcode/" aria-label="ret2shellcode"></a>
     
     
-    <div class="post-cover right">
+    <div class="post-cover left">
       
         
         
-          <img src="/covers/【哲风壁纸】蝴蝶忍-鬼灭之刃.webp" loading="lazy" decoding="async" alt="ret2shellcode" class="lazyload">
+          <img src="/covers/【哲风壁纸】中野二乃-五等分.webp" loading="lazy" decoding="async" alt="ret2shellcode" class="lazyload">
         
       
     </div>
@@ -379,16 +433,16 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
       
     
       <div class="post-wrapper">
-  <div class="post-wrap left" data-aos="fade-up">
+  <div class="post-wrap right" data-aos="fade-up">
     
       <a class="post-link" href="../../2026/02/14/%E6%A0%88%E6%BA%A2%E5%87%BA/" aria-label="栈溢出"></a>
     
     
-    <div class="post-cover left">
+    <div class="post-cover right">
       
         
         
-          <img src="/covers/【哲风壁纸】守岸-鸣潮.webp" loading="lazy" decoding="async" alt="栈溢出" class="lazyload">
+          <img src="/covers/【哲风壁纸】光带-卡提希娅-少女.webp" loading="lazy" decoding="async" alt="栈溢出" class="lazyload">
         
       
     </div>
@@ -454,10 +508,10 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
     
       <div>
         <span class="icon-brush"></span>
-        12.7k
+        14.2k
         &nbsp;|&nbsp;
         <span class="icon-coffee"></span>
-        00:47
+        00:52
       </div>
     
     
@@ -494,7 +548,7 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
 <div class="sidebar-state">
   <div class="sidebar-state-article">
     <div>文章</div>
-    <div class="sidebar-state-number">10</div>
+    <div class="sidebar-state-number">11</div>
   </div>
   <div class="sidebar-state-category">
     <div>分类</div>
@@ -502,7 +556,7 @@ asm(shellcraft.sh())用于生成获取 shell 的 shellcode，其中asm()会将�
   </div>
   <div class="sidebar-state-tag">
     <div>标签</div>
-    <div class="sidebar-state-number">12</div>
+    <div class="sidebar-state-number">13</div>
   </div>
 </div>
 <div class="sidebar-social">

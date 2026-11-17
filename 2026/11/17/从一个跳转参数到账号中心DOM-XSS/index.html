@@ -1,0 +1,1128 @@
+
+  <!DOCTYPE html>
+  <html lang="zh-CN"  
+    
+      data-theme-mode="auto"
+    
+  >
+  <head>
+  
+  <meta charset="utf-8">
+  
+
+  
+
+  
+
+  <script>window.REIMU_CONFIG = {};window.REIMU_CONFIG.icon_font = '4552607_4k4bc36ef96';window.REIMU_CONFIG.clipboard_tips = {"success":{"en":"Copy successfully (*^▽^*)","zh-CN":"复制成功 (*^▽^*)","zh-TW":"複製成功 (*^▽^*)","ja":"コピー成功 (*^▽^*)","pt-BR":"Copiado com sucesso (*^▽^*)"},"fail":{"en":"Copy failed (ﾟ⊿ﾟ)ﾂ","zh-CN":"复制失败 (ﾟ⊿ﾟ)ﾂ","zh-TW":"複製失敗 (ﾟ⊿ﾟ)ﾂ","ja":"コピー失敗 (ﾟ⊿ﾟ)ﾂ","pt-BR":"Falha ao copiar (ﾟ⊿ﾟ)ﾂ"},"copyright":{"enable":false,"count":50,"license_type":"by-nc-sa"}};window.REIMU_CONFIG.clipboard_tips.copyright.content = '本博客所有文章除特别声明外，均采用 BY-NC-SA 许可协议。转载请注明出处！';window.REIMU_CONFIG.code_block = {"expand":true};window.REIMU_CONFIG.base = 'http://1t01x1w4.github.io';</script>
+  
+  <title>
+    从一个跳转参数到账号中心DOM XSS |
+    
+    淋着雨
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish%3A400%2C400italic%2C700%2C700italic&display=swap" media="print" onload="this.media&#x3D;&#39;all&#39;">
+  
+  
+    <link rel="preload" href="//at.alicdn.com/t/c/font_4552607_4k4bc36ef96.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  
+  
+    
+<link rel="stylesheet" href="../../../../css/loader.css">
+
+  
+  
+    <meta name="description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述某厂商国际版账号中心的个人中心页面，前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从一个跳转参数到账号中心DOM XSS">
+<meta property="og:url" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/index.html">
+<meta property="og:site_name" content="淋着雨">
+<meta property="og:description" content="免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述某厂商国际版账号中心的个人中心页面，前">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image1.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image2.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image3.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image4.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image5.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image6.webp">
+<meta property="og:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image7.webp">
+<meta property="article:published_time" content="2026-11-17T02:20:53.000Z">
+<meta property="article:modified_time" content="2026-11-17T03:01:14.449Z">
+<meta property="article:author" content="淋着雨">
+<meta property="article:tag" content="DOM XSS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/image1.webp">
+  
+  
+  
+    <link rel="shortcut icon" href="../../../../images/favicon.ico">
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  <link rel="preload" as="style" onload="this.onload&#x3D;null;this.rel&#x3D;&#39;stylesheet&#39;" href="https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.css" integrity="sha384-IfxC36XL&#x2F;toUyJ939C73PcgMuRzAZuIzZxE38drsmO5p6jD7ei+Zx&#x2F;1oA&#x2F;0l8ysE" crossorigin="anonymous">
+  
+  
+  
+  
+    
+<script src="https://npm.webcache.cn/pace-js@1.2.4/pace.min.js" integrity="sha384-k6YtvFUEIuEFBdrLKJ3YAUbBki333tj1CSUisai5Cswsg9wcLNaPzsTHDswp4Az8" crossorigin="anonymous" defer></script>
+
+  
+  
+    
+<link rel="stylesheet" href="https://npm.webcache.cn/@reimujs/aos@0.1.2/dist/aos.css" integrity="sha384-GMRP93c6Hkz9JVKGAuRR3nTS7M07RwPgTFenXiosjq2VbVgvdDNcz1g6Mkj8AONa" crossorigin="anonymous">
+
+  
+  
+  
+    <style>
+  .article-entry .img-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 1.5em 0;
+  }
+  .article-entry .img-row > img,
+  .article-entry .img-row > a {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .article-entry .img-row img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  .article-entry .img-narrow {
+    width: 75%;
+    margin: 1.5em auto;
+  }
+  .article-entry .img-narrow img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    .article-entry .img-row { gap: 8px; }
+    .article-entry .img-narrow { width: 90%; }
+  }
+</style>
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+  <body>
+    
+    
+  <div id='loader'>
+    <div class="loading-left-bg loading-bg"></div>
+    <div class="loading-right-bg loading-bg"></div>
+    <div class="spinner-box">
+      <div class="loading-taichi rotate">
+        
+          <svg width="150" height="150" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="https://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+            <path d="M303.5 432A80 80 0 0 1 291.5 592A80 80 0 0 1 303.5 432z" fill="var(--red-1, #ff5252)" />
+            <path d="M512 65A447 447 0 0 1 512 959L512 929A417 417 0 0 0 512 95A417 417 0 0 0 512 929L512 959A447 447 0 0 1 512 65z 
+           M512 95A417 417 0 0 1 929 512A208.5 208.5 0 0 1 720.5 720.5L720.5 592A80 80 0 0 0 720.5 432A80 80 0 0 0 720.5 592L720.5 720.5A208.5 208.5 0 0 1 512 512A208.5 208.5 0 0 0 303.5 303.5A208.5 208.5 0 0 0 95 512A417 417 0 0 1 512 95z" fill="var(--red-1, #ff5252)" />
+          </svg>
+        
+      </div>
+      
+      
+        
+      
+      <div class="loading-word">少女祈祷中...</div>
+    </div>
+  </div>
+  </div>
+  <script>
+    var loaderDone = false;
+    var endLoading = () => {
+      if (loaderDone) return;
+      loaderDone = true;
+      document.body.style.overflow = 'auto';
+      document.getElementById('loader').classList.add("loading");
+    }
+    // 优化：加载遮罩改为固定短时长（DOMContentLoaded + 500ms，最多 1.5s），不再被网络请求拖住
+    window.addEventListener('DOMContentLoaded', () => setTimeout(endLoading, 500));
+    setTimeout(endLoading, 1500);
+    document.getElementById('loader').addEventListener('click', endLoading);
+  </script>
+
+<div id="copy-tooltip" style="pointer-events: none; opacity: 0; transition: all 0.2s ease; position: fixed;top: 50%;left: 50%;z-index: 999;transform: translate(-50%, -50%);color: white;background: rgba(0, 0, 0, 0.5);padding: 10px 15px;border-radius: 10px;">
+</div>
+<div id="heatmap-tooltip"></div>
+
+
+    <div id="container">
+      <div id="wrap">
+        <div id="header-nav">
+  <nav id="main-nav">
+    
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../index.html">主页</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../archives">归档</a>
+        </span>
+      
+        <span class="main-nav-link-wrap">
+          <div class="main-nav-icon icon rotate">
+             
+              &#xe62b;
+             
+          </div>
+          <a class="main-nav-link" href="../../../../friend">友链</a>
+        </span>
+      
+    
+    <a id="main-nav-toggle" class="nav-icon"></a>
+  </nav>
+  <nav id="sub-nav">
+    
+    
+    
+  </nav>
+  
+</div>
+<header id="header">
+  
+    
+      
+        <picture>
+          
+        </picture>
+        
+          <img  fetchpriority="high" src="/images/bannner.webp" alt="从一个跳转参数到账号中心DOM XSS">
+        
+      
+    
+  
+  <div id="header-outer">
+    <div id="header-title">
+      
+        
+        
+          <span id="logo">
+            <h1 data-aos="slide-up">从一个跳转参数到账号中心DOM XSS</h1>
+          </span>
+        
+      
+      
+        
+        <h2 id="subtitle-wrap" data-aos="slide-down">
+          
+        </h2>
+      
+    </div>
+  </div>
+</header>
+
+        <div id="content"  class="sidebar-right" >
+          <aside id="sidebar">
+  
+  <div class="sidebar-wrapper-container sticky">
+  
+    
+    
+  
+ 
+  <div class="sidebar-wrapper">
+    <div class="sidebar-wrap" data-aos="fade-up">
+      
+        
+          <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E5%9C%A8%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%AD%90%E5%9F%9F"><span class="toc-number">3.1.</span> <span class="toc-text">入口在另一个子域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%EF%BC%8C%E8%BF%9B%E5%85%A5%E4%B8%AA%E4%BA%BA%E4%B8%AD%E5%BF%83"><span class="toc-number">3.2.</span> <span class="toc-text">登录，进入个人中心</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E9%93%BE%E6%8E%A5"><span class="toc-number">3.3.</span> <span class="toc-text">构造链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E3%80%8C%E5%8F%96-%E6%B6%88%E3%80%8D%EF%BC%8C%E6%A0%87%E9%A2%98%E5%8F%98%E6%88%90-XSS9F2K"><span class="toc-number">3.4.</span> <span class="toc-text">点「取 消」，标题变成 XSS9F2K</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%BA%90%E8%AF%BB%E5%8F%96%EF%BC%9A%E9%A1%B5%E9%9D%A2%E7%9B%B4%E6%8E%A5%E6%98%BE%E7%A4%BA%E8%B4%A6%E5%8F%B7-JSON"><span class="toc-number">3.5.</span> <span class="toc-text">同源读取：页面直接显示账号 JSON</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%E5%B8%A6%E5%BD%B1%E5%93%8D%EF%BC%9A%E5%BC%80%E6%94%BE%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">3.6.</span> <span class="toc-text">附带影响：开放重定向</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+  
+</div>
+</div>
+          <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">11</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">3</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">13</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+        
+      
+      
+        
+          <div class="sidebar-btn-wrapper" style="position:static">
+            <div class="sidebar-toc-btn current"></div>
+            <div class="sidebar-common-btn"></div>
+          </div>
+        
+      
+    </div>
+  </div>
+  
+  <div class="sidebar-widget">
+  
+  </div>
+  
+  </div>
+  
+</aside>
+
+          <section id="main"><article id="post-从一个跳转参数到账号中心DOM-XSS" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner" data-aos="fade-up">
+    <div class="article-meta">
+      <div class="article-date">
+  <span class="article-date-link icon-calendar" data-aos="zoom-in">
+    <time datetime="2026-11-17T02:20:53.000Z" itemprop="datePublished">2026-11-17</time>
+    <time style="display: none;" id="post-update-time">2026-11-17</time>
+  </span>
+  
+</div>
+
+      
+  <div class="article-category">
+    <a class="article-category-link" href="../../../../categories/%E6%BC%8F%E6%8C%96/" data-aos="zoom-in">漏挖</a>
+  </div>
+
+
+    </div>
+    
+    <div class="hr-line"></div>
+    
+
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+      
+        <h2 id="免责声明"><a href="#免责声明" class="headerlink" title="免责声明"></a>免责声明</h2><p>本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。</p>
+<p>读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。</p>
+<h2 id="漏洞简述"><a href="#漏洞简述" class="headerlink" title="漏洞简述"></a>漏洞简述</h2><p>某厂商国际版账号中心的个人中心页面，前端在「取消 &#x2F; 完成」回调里直接读取 URL 查询参数中的跳转地址并赋值给 <code>location.href</code>，未校验协议与目标域名。攻击者构造 <code>javascript:</code> 伪协议链接，诱导已登录用户打开并点击一次「取消」，脚本即在账号中心域内执行：可同源读取当前用户的邮箱、手机号以及实名姓名与证件号并静默外带，也可在可信域名内伪造登录表单实施钓鱼。</p>
+<h2 id="完整过程"><a href="#完整过程" class="headerlink" title="完整过程"></a>完整过程</h2><h3 id="入口在另一个子域"><a href="#入口在另一个子域" class="headerlink" title="入口在另一个子域"></a>入口在另一个子域</h3><p>目标是一个国际站（下称 <code>global.XXX.com</code>）。首页是 Gatsby 生成的静态站，挂在 OSS + CDN 上，响应里带 <code>x-oss-request-id</code>，一眼就能看出是对象存储直出。</p>
+<p>随机请求 5 个不存在的路径，返回的 403 页面字节级完全一致（45,704 字节的 Gatsby 404 页）。站点是统一的软 404，挂字典扫目录没有意义，于是把精力转到 JS 上。</p>
+<p>营销站的主 bundle 里有一个配置模块，写着 <code>baseUrl</code>、<code>consoleUrl</code>、<code>findocxUrl</code> 等地址，顺着就翻到了一个没在页面导航里出现的子域：<code>account-global.XXX.com</code>——国际版账号中心。登录、个人资料、实名、企业信息这些业务都在这里。</p>
+<h3 id="登录，进入个人中心"><a href="#登录，进入个人中心" class="headerlink" title="登录，进入个人中心"></a>登录，进入个人中心</h3><p>账号中心是自注册的：图形验证码 → 邮箱验证码 → 设置用户名密码。用一个临时邮箱走完了流程，拿到一个普通账号。</p>
+<p><img src="image1.webp" alt="登录"></p>
+<p>登录后进入个人中心，能看到基本信息与安全信息（头像、用户名、密码、手机号、邮箱）：</p>
+<p><img src="image2.webp" alt="个人中心"></p>
+<h3 id="构造链接"><a href="#构造链接" class="headerlink" title="构造链接"></a>构造链接</h3><p>把账号中心的前端 bundle 拉下来，搜跳转相关代码，很快看到一个很朴素的函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">v = <span class="keyword">function</span> (<span class="params">e</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> t = <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">search</span>,</span><br><span class="line">      n = qs.<span class="title function_">parse</span>(t);</span><br><span class="line">  n.<span class="property">redirect_url</span> ? <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">href</span> = n.<span class="property">redirect_url</span> : <span class="title function_">_</span>(e);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>同一份 bundle 里，改密成功的回调也是同样的写法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">e</span>) &#123;</span><br><span class="line">  <span class="string">&quot;undefined&quot;</span> !== <span class="keyword">typeof</span> n.<span class="property">redirect_url</span></span><br><span class="line">    ? <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">href</span> = n.<span class="property">redirect_url</span></span><br><span class="line">    : (success, history.<span class="title function_">push</span>(<span class="string">&quot;/pages/personal/password&quot;</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>个人中心的头像、密码、手机号、邮箱几个子页，取消 &#x2F; 完成回调复用的都是这个 <code>v()</code>。只要 <code>redirect_url</code> 可控，<code>location.href</code> 就能被赋成任意值；如果值是 <code>javascript:</code> 伪协议，就会在当前文档里执行脚本，而不是跳转。</p>
+<p>把 <code>redirect_url</code> 设为 <code>javascript:document.title=&#39;XSS9F2K&#39;;void(0)</code>，打开构造好的链接，页面正常弹出「头像」编辑框：</p>
+<p><img src="image3.webp" alt="正常弹框"></p>
+<h3 id="点「取-消」，标题变成-XSS9F2K"><a href="#点「取-消」，标题变成-XSS9F2K" class="headerlink" title="点「取 消」，标题变成 XSS9F2K"></a>点「取 消」，标题变成 XSS9F2K</h3><p>点击弹窗左下角的「取 消」，标签页标题变成 <code>XSS9F2K</code>：</p>
+<p><img src="image4.webp" alt="payload执行"></p>
+<p>这里有个很容易误判的细节：<strong>页面看起来没有任何变化</strong>。这是正常的——<code>javascript:</code> 伪协议只在当前文档里执行，不会发起导航或刷新，所以唯一可见的副作用就是标题被改。标题能变成任意字符串，只有 JS 能做到，这就是执行证据。</p>
+<h3 id="同源读取：页面直接显示账号-JSON"><a href="#同源读取：页面直接显示账号-JSON" class="headerlink" title="同源读取：页面直接显示账号 JSON"></a>同源读取：页面直接显示账号 JSON</h3><p>把 payload 换成同源请求，把 <code>userinfo</code> 的返回直接写到页面上：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javascript:fetch(&#x27;/api/v1/userinfo&#x27;).then(r=&gt;r.text()).then(t=&gt;document.body.innerHTML=&#x27;&lt;pre&gt;&#x27;+t.replace(/&lt;/g,&#x27;&amp;lt;&#x27;)+&#x27;&lt;/pre&gt;&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>点击「取 消」后，页面变成账号 JSON，DevTools 的 Network 里能看到 <code>GET /api/v1/userinfo</code> 返回 200：</p>
+<p><img src="image5.webp" alt="同源读取"></p>
+<p>因为脚本和接口同源，<code>fetch</code> 会自动带上 HttpOnly 的会话 Cookie——不需要读 Cookie，效果等价于「以受害者身份发请求」。响应里的 <code>email</code>、<code>uid</code>、<code>identity_name</code>、<code>identity_number</code>、<code>phone_number</code> 都会一并返回；测试账号未实名，所以实名与手机字段为空，但字段结构是确认的。</p>
+<h3 id="附带影响：开放重定向"><a href="#附带影响：开放重定向" class="headerlink" title="附带影响：开放重定向"></a>附带影响：开放重定向</h3><p>同一个参数换成普通 URL，点「取 消」后会直接跳走。把 <code>redirect_url</code> 设为 <code>https://www.baidu.com/?from=...</code>：</p>
+<p><img src="image6.webp" alt="重定向"></p>
+<p>点击后页面跳到百度：</p>
+<p><img src="image7.webp" alt="成功跳转"></p>
+<p><code>example.com</code> 和 <code>www.baidu.com</code> 都试过，均跳转成功——<code>redirect_url</code> 没有任何协议或域名白名单，属于同一处 sink 的开放重定向。</p>
+<h2 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h2><ol>
+<li><strong>身份信息泄露</strong>：同源读取 <code>/api/v1/userinfo</code>，包含邮箱、手机号；已实名用户的 <code>identity_name</code>（姓名）与 <code>identity_number</code>（证件号）也在同一响应里。脚本可以静默外带，页面没有任何感知。</li>
+<li><strong>会话内操作</strong>：以受害者身份调用账号中心同源接口（头像、活体 token 申请、退出登录等），不需要知道密码。</li>
+<li><strong>可信域钓鱼</strong>：脚本可以把页面替换成「会话过期，请重新输入密码」的表单，用户输入后即时外带；页面域名是账号中心本身，欺骗性远高于独立钓鱼站。</li>
+<li><strong>开放重定向</strong>：同一参数可跳任意外部域名，可配合品牌仿冒。</li>
+</ol>
+<h2 id="修复建议"><a href="#修复建议" class="headerlink" title="修复建议"></a>修复建议</h2><ol>
+<li><strong>跳转参数只允许站内相对路径或白名单域名</strong>：以 <code>/</code> 开头且非 <code>//</code>，或显式白名单；拒绝 <code>javascript:</code>、<code>data:</code>、<code>vbscript:</code> 等伪协议。</li>
+<li><strong>解码后再校验</strong>：先完整 URL 解码 &#x2F; 规范化，再判断协议与主机，防止 <code>java%09script:</code>、大小写、前后空白等变形。</li>
+<li><strong>在公共函数处统一修复</strong>：个人中心多个子页复用同一个 <code>v()</code>，只改一个页面会漏。</li>
+<li><strong>补 CSP</strong>：<code>script-src &#39;self&#39;</code> 作为纵深防御，降低同类 DOM 注入的成功率。</li>
+<li><strong>回归用例</strong>：把 <code>javascript:</code>、<code>java%09script:</code>、<code>//evil.com</code>、<code>https://evil.com</code> 写成自动化回归。</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in"><a class="article-tag-list-link" href="../../../../tags/DOM-XSS/" rel="tag">DOM XSS</a></li></ul>
+
+
+    </footer>
+  </div>
+  
+  <nav id="article-nav" data-aos="fade-up">
+    
+    
+    
+    <div class="article-nav-link-wrap right">
+      
+        
+        
+          <img src="/covers/【哲风壁纸】圣杯战争-日本动漫.webp" loading="lazy" decoding="async" alt="从小程序反编译到actuator未授权访问" class="lazyload">
+        
+      
+      <a href="/2026/10/25/%E4%BB%8E%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%8F%8D%E7%BC%96%E8%AF%91%E5%88%B0actuator%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/"></a>
+      <div class="article-nav-caption">后一篇</div>
+      <h3 class="article-nav-title">
+        
+          从小程序反编译到actuator未授权访问
+        
+      </h3>
+    </div>
+    
+  </nav>
+
+
+</article>
+
+
+
+
+
+
+
+
+
+  <section id="comments" data-aos="fade-up">
+    <div class="comment-header">
+      
+      
+        
+      
+      <h2 class="comment-title">说些什么吧！</h2>
+      <div class="comment-selector">
+        <div class="comment-selector-wrap">
+            
+            <div class="selector-item" data-selector="giscus">
+              <span>giscus</span>
+            </div>
+            
+        </div>
+      </div>
+    </div>
+    <div class="comment-content">
+      
+        <div class="comment giscus-comment" data-aos="fade-up"
+          id="giscus-comment">
+        </div>
+      
+    </div>
+  </section>
+
+
+</section>
+        </div>
+        <footer id="footer">
+  <div style="width: 100%; overflow: hidden">
+    <div class="footer-line"></div>
+  </div>
+  <div id="footer-info">
+    
+    <div>
+      <span class="icon-copyright"></span>
+      
+      
+      
+        2020-2026
+      
+      <span class="footer-info-sep rotate"></span>
+      淋着雨
+    </div>
+    
+      <div>
+        基于&nbsp;<a href="https://hexo.io/" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a>&nbsp;
+        Theme.<a href="https://github.com/D-Sketon/hexo-theme-reimu" rel="noopener external nofollow noreferrer" target="_blank">Reimu</a>
+      </div>
+    
+    
+      <div>
+        <span class="icon-brush"></span>
+        14.2k
+        &nbsp;|&nbsp;
+        <span class="icon-coffee"></span>
+        00:52
+      </div>
+    
+    
+    
+    
+    
+      <div>
+        <span class="icon-eye"></span>
+        <span id="busuanzi_container_site_pv">总访问量&nbsp;<span id="busuanzi_value_site_pv"></span></span>
+        &nbsp;|&nbsp;
+        <span class="icon-user"></span>
+        <span id="busuanzi_container_site_uv">总访客量&nbsp;<span id="busuanzi_value_site_uv"></span></span>
+      </div>
+    
+  </div>
+</footer>
+
+        
+          <div class="sidebar-top">
+            <div class="sidebar-top-taichi rotate"></div>
+            <div class="arrow-up"></div>
+          </div>
+        
+        <div id="mask" class="hide"></div>
+      </div>
+      <nav id="mobile-nav">
+  <div class="sidebar-wrap">
+    
+      
+        <div class="sidebar-toc-sidebar"><h3 class="toc-title">文章目录</h3>
+<div class="sidebar-toc-wrapper toc-div-class" >
+  
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">免责声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%AE%80%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">漏洞简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">完整过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E5%9C%A8%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%AD%90%E5%9F%9F"><span class="toc-number">3.1.</span> <span class="toc-text">入口在另一个子域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%EF%BC%8C%E8%BF%9B%E5%85%A5%E4%B8%AA%E4%BA%BA%E4%B8%AD%E5%BF%83"><span class="toc-number">3.2.</span> <span class="toc-text">登录，进入个人中心</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E9%93%BE%E6%8E%A5"><span class="toc-number">3.3.</span> <span class="toc-text">构造链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E3%80%8C%E5%8F%96-%E6%B6%88%E3%80%8D%EF%BC%8C%E6%A0%87%E9%A2%98%E5%8F%98%E6%88%90-XSS9F2K"><span class="toc-number">3.4.</span> <span class="toc-text">点「取 消」，标题变成 XSS9F2K</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%BA%90%E8%AF%BB%E5%8F%96%EF%BC%9A%E9%A1%B5%E9%9D%A2%E7%9B%B4%E6%8E%A5%E6%98%BE%E7%A4%BA%E8%B4%A6%E5%8F%B7-JSON"><span class="toc-number">3.5.</span> <span class="toc-text">同源读取：页面直接显示账号 JSON</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%E5%B8%A6%E5%BD%B1%E5%93%8D%EF%BC%9A%E5%BC%80%E6%94%BE%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">3.6.</span> <span class="toc-text">附带影响：开放重定向</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B1%E5%AE%B3"><span class="toc-number">4.</span> <span class="toc-text">危害</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">修复建议</span></a></li></ol>
+  
+</div>
+</div>
+        <div class="sidebar-common-sidebar hidden"><div class="sidebar-author">
+  <img src="/avatar/avatar.webp" loading="lazy" decoding="async" alt="淋着雨" class="lazyload">
+  <div class="sidebar-author-name">淋着雨</div>
+  <div class="sidebar-description"></div>
+</div>
+<div class="sidebar-state">
+  <div class="sidebar-state-article">
+    <div>文章</div>
+    <div class="sidebar-state-number">11</div>
+  </div>
+  <div class="sidebar-state-category">
+    <div>分类</div>
+    <div class="sidebar-state-number">3</div>
+  </div>
+  <div class="sidebar-state-tag">
+    <div>标签</div>
+    <div class="sidebar-state-number">13</div>
+  </div>
+</div>
+<div class="sidebar-social">
+  
+</div>
+<div class="sidebar-menu">
+  
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/" aria-label="主页"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">主页</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/archives" aria-label="归档"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">归档</div>
+      </div>
+    
+      <div class="sidebar-menu-link-wrap">
+        <a class="sidebar-menu-link-dummy" href="/friend" aria-label="友链"></a>
+        <div class="sidebar-menu-icon icon rotate">
+          
+            &#xe62b;
+          
+        </div>
+        <div class="sidebar-menu-link">友链</div>
+      </div>
+    
+  
+</div>
+</div>
+      
+    
+  </div>
+  
+    
+      <div class="sidebar-btn-wrapper">
+        <div class="sidebar-toc-btn current"></div>
+        <div class="sidebar-common-btn"></div>
+      </div>
+    
+  
+</nav>
+
+    </div>
+    
+    
+    
+    
+<script src="https://npm.webcache.cn/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha384-J08i8An&#x2F;QeARD9ExYpvphB8BsyOj3Gh2TSh1aLINKO3L0cMSH2dN3E22zFoXEi0Q" crossorigin="anonymous"></script>
+
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+  
+<script src="../../../../js/aos.js" defer></script>
+
+  <script>
+    var aosInit = () => {
+      AOS.init({
+        duration: 1000,
+        easing: "ease",
+        once: true,
+        offset: 50,
+      });
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', aosInit);
+    } else {
+      aosInit();
+    }
+  </script>
+
+
+
+<script src="../../../../js/pjax_script.js" data-pjax defer></script>
+
+
+
+
+
+
+
+  
+<script src="https://npm.webcache.cn/mouse-firework@0.1.1/dist/index.umd.js" integrity="sha384-8LyaidD9GPxQQgLJO&#x2F;WRw&#x2F;O2h3BoNq&#x2F;ApI&#x2F;ecpvM6RsrCz2qP2ppBXUKihP4V&#x2F;2d" crossorigin="anonymous" defer></script>
+
+  <script>
+    var fireworkInit = () => {
+      window.firework && window.firework(JSON.parse('{"excludeElements":["a","button"],"particles":[{"shape":"circle","move":["emit"],"easing":"easeOutExpo","colors":["#6366F1","#7C3AED","#8B5CF6","#A78BFA"],"number":20,"duration":[1200,1800],"shapeOptions":{"radius":[16,32],"alpha":[0.3,0.5]}},{"shape":"circle","move":["diffuse"],"easing":"easeOutExpo","colors":["#4F46E5"],"number":1,"duration":[1200,1800],"shapeOptions":{"radius":20,"alpha":[0.2,0.5],"lineWidth":6}}]}'))
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireworkInit);
+    } else {
+      fireworkInit();
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<div id="lazy-script">
+  <div>
+    
+      
+      
+      <script data-pjax>
+        window.REIMU_POST = {
+          author: "淋着雨",
+          title: "从一个跳转参数到账号中心DOM XSS",
+          url: "http://1t01x1w4.github.io/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/",
+          excerpt: "",
+          description: "",
+          stripContent: "免责声明本文仅用于安全技术研究与交流，文中涉及的漏洞已提交至厂商 SRC。文中域名、接口、参数及数据均已做脱敏处理，请勿将本文内容用于任何未经授权的测试、攻击或非法获利。 读者应遵守《中华人民共和国网络安全法》等相关法律法规。因不当使用本文内容所造成的一切后果及法律责任，由使用者自行承担，作者不承担任何责任。如本文内容侵犯了您的权益，请联系作者删除。 漏洞简述某厂商国际版账号中心的个人中心页面，前端在「取消 &amp;#x2F; 完成」回调里直接读取 URL 查询参数中的跳转地址并赋值给 locatio",
+          date: "Tue Nov 17 2026 10:20:53 GMT+0800",
+          updated: "Tue Nov 17 2026 11:01:14 GMT+0800",
+          cover: "/images/bannner.webp",
+        };
+      </script>
+       
+    
+    
+      
+        
+<script src="../../../../js/insert_highlight.js" data-pjax></script>
+
+        
+      
+    
+    
+      <script type="module" data-pjax>
+        const PhotoSwipeLightbox = (await safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js", "sha384-DiL6M/gG+wmTxmCRZyD1zee6lIhawn5TGvED0FOh7fXcN9B0aZ9dexSF/N6lrZi/")).default;
+        
+        const pswp = () => {
+          if (_$$('.article-entry a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-entry',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          if(_$$('.article-gallery a.article-gallery-item').length > 0) {
+            new PhotoSwipeLightbox({
+              gallery: '.article-gallery',
+              children: 'a.article-gallery-item',
+              pswpModule: () => safeImport("https://npm.webcache.cn/photoswipe@5.4.4/dist/photoswipe.esm.min.js", "sha384-WkkO3GCmgkC3VQWpaV8DqhKJqpzpF9JoByxDmnV8+oTJ7m3DfYEWX1fu1scuS4+s")
+            }).init();
+          }
+          window.lightboxStatus = 'done';
+          window.removeEventListener('lightbox:ready', pswp);
+        }
+        if(window.lightboxStatus === 'ready') {
+          pswp()
+        } else {
+          window.addEventListener('lightbox:ready', pswp);
+        }
+      </script>
+      
+        
+
+
+
+
+
+
+
+
+<script data-pjax>
+  var loadScript = (src, integrity) => {
+    const script = document.createElement('script');
+    script.src = src;
+    if (integrity) script.integrity = integrity;
+    script.crossOrigin = 'anonymous';
+    return script;
+  };
+
+  var commentConfigKeys = ['valine', 'waline', 'twikoo', 'gitalk', 'giscus'];
+  var commentConfig = {
+    valine: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.valine-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/valine@1.5.1/dist/Valine.min.js',
+          'sha384-3ma91AExDeMAZ1rjTjaP8V2A2obQE+s5ltKRwYlwdpArz9xVbp0tF3b0VV2ACNPn'
+        );
+        script.onload = () => {
+          var GUEST_INFO = ['nick', 'mail', 'link'];
+          var guest_info = 'nick,mail,link'.split(',').filter((item) => {
+            return GUEST_INFO.indexOf(item) > -1
+          });
+          var recordIP = JSON.parse('true');
+          var highlight = JSON.parse('true');
+          var visitor = JSON.parse('false');
+          var serverURLs = undefined;
+
+          if (window.Valine) {
+            new Valine({
+              el: '.valine-comment',
+              appId: "",
+              appKey: "",
+              placeholder: "Just go go",
+              pageSize: '10',
+              avatar: 'mp',
+              lang: document.documentElement.lang || 'en',
+              recordIP: recordIP,
+              highlight: highlight,
+              visitor: visitor,
+              requiredFields: guest_info,
+              path: window.location.pathname,
+              serverURLs
+            });
+          }
+        };
+        document.head.appendChild(script);
+      }
+    },
+    waline: {
+      enable: false,
+      load: async () => {
+        const container = document.querySelector('.waline-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        let walineInit;
+        const walineCdn = 'https://npm.webcache.cn/@waline/client@2.15.8/dist/waline.mjs';
+        const walineIntegrity = 'sha384-9sbqJjrfGjbkI6/PI4nU/MvBfEmkkPC4YK9I4zBeMIf1CVCZdCMH/KinBEAZII/5';
+
+        const module = await safeImport(walineCdn, walineIntegrity);
+        walineInit = module.init;
+
+        window.walineInstance = walineInit({
+          el: '.waline-comment',
+          serverURL: '',
+          lang: document.documentElement.lang || 'en',
+          locale: {},
+          emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus","https://unpkg.com/@waline/emojis@1.2.0/bilibili","https://unpkg.com/@waline/emojis@1.2.0/qq","https://unpkg.com/@waline/emojis@1.2.0/tieba","https://unpkg.com/@waline/emojis@1.2.0/tw-emoji"],
+          meta: ["nick","mail","link"],
+          requiredMeta: ["nick","mail"],
+          wordLimit: JSON.parse('0'),
+          comment: true,
+          pageSize: JSON.parse('10'),
+          dark: 'html[data-theme="dark"]',
+          pageview: JSON.parse('true'),
+        });
+      }
+    },
+    twikoo: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.twikoo-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/twikoo@1.6.44/dist/twikoo.all.min.js',
+          'sha384-kwWLC0HjeZZnVPqCJ1AncI8tsk+kQqF9TbAmCclcc9Z0hGkfgHRzeQZxmdmZhE0K'
+        );
+
+        script.onload = () => {
+          if (window.twikoo) {
+            twikoo.init({
+              envId: '',
+              el: '.twikoo-comment',
+              region: '',
+              lang: document.documentElement.lang || 'en',
+            });
+
+            twikoo.getCommentsCount({
+              envId: '',
+              region: '',
+              urls: [
+                '/2026/11/17/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%B7%B3%E8%BD%AC%E5%8F%82%E6%95%B0%E5%88%B0%E8%B4%A6%E5%8F%B7%E4%B8%AD%E5%BF%83DOM-XSS/'
+              ],
+              includeReply: false
+            }).then((res) => {
+              _$('.twikoo-comment-count').innerText = res[0].count;
+            }).catch((err) => {
+              console.error(err);
+            });
+          }
+        } 
+        document.head.appendChild(script);
+      }
+    },
+    gitalk: {
+      enable: false,
+      load: () => {
+        const container = document.querySelector('.gitalk-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        const script = loadScript(
+          'https://npm.webcache.cn/gitalk@1.8.0/dist/gitalk.min.js',
+          'sha384-kspnZUWBoSWwoJHa0hBCXYbHGbhvU/lcEH5O8eVbSDhbPwsiVUTp/aGX/z/5EuMA'
+        );
+
+        script.onload = () => {
+          if (false) {
+            const md5Script = loadScript(
+              'https://npm.webcache.cn/blueimp-md5@2.19.0/js/md5.min.js',
+              'sha384-JmVtRz6RWiXnA14QbIOJzPuU3MidULOpBP66deeLLyyoF4Tr/gZlbkHkL6vTthxH'
+            );
+            md5Script.onload = initGitalk;
+            document.head.appendChild(md5Script);
+          } else {
+            initGitalk();
+          }
+        }
+        document.head.appendChild(script);
+
+        function initGitalk() {
+          var gitalkId = location.pathname;
+          var gitalk = new Gitalk({
+            clientID: '',
+            clientSecret: '',
+            repo: '',
+            owner: '',
+            admin: null,
+            id: gitalkId,
+            distractionFreeMode: false,
+            language: document.documentElement.lang || 'en',
+          })
+          gitalk.render('gitalk-comment');
+        }
+      }
+    },
+    giscus: {
+      enable: true,
+      load: () => {
+        const container = document.querySelector('.giscus-comment');
+        if (!container) return;
+        container.style.display = 'block';
+
+        // 删除可能已存在的 giscus 脚本和 iframe
+        const existingScript = container.querySelector('script[src*="giscus.app/client.js"]');
+        if (existingScript) existingScript.remove();
+        const existingFrame = document.querySelector('iframe.giscus-frame');
+        if (existingFrame) existingFrame.remove();
+
+        const giscusScript = document.createElement('script');
+        const domMode = document.documentElement.getAttribute("data-theme");
+
+        const docLang = document.documentElement.lang || 'en';
+        const langBase = docLang.split('-')[0];
+        const supportedLangs = ['ar', 'be', 'bg', 'ca', 'cs', 'da', 'de', 'en', 
+        'eo', 'es', 'eu', 'fa', 'fr', 'gr', 'hbs', 'he', 'hu', 'id', 'it', 'ja', 
+        'kh', 'ko', 'nl', 'pl', 'pt', 'ro', 'ru', 'th', 'tr', 'uk', 'uz', 'vi', 'zh-CN', 'zh-HK', 'zh-TW'];
+        const giscusLang = supportedLangs.includes(docLang) ? docLang : supportedLangs.includes(langBase) ? langBase : 'en';
+
+        giscusScript.src = 'https://giscus.app/client.js';
+        giscusScript.setAttribute('data-repo', '1t01x1w4/1t01x1w4.github.io');
+        giscusScript.setAttribute('data-repo-id', 'R_kgDORN3jAg');
+        giscusScript.setAttribute('data-category', 'General'); 
+        giscusScript.setAttribute('data-category-id', 'DIC_kwDORN3jAs4C2arB');
+        giscusScript.setAttribute('data-mapping', '0');
+        giscusScript.setAttribute('data-strict', '0');
+        giscusScript.setAttribute('data-reactions-enabled', '1');
+        giscusScript.setAttribute('data-emit-metadata', '0');
+        giscusScript.setAttribute('data-input-position', 'bottom');
+        giscusScript.setAttribute('data-theme', domMode === 'dark' ? 'dark' : 'light');
+        giscusScript.setAttribute('data-lang', giscusLang);
+        giscusScript.setAttribute('crossorigin', 'anonymous');
+        giscusScript.async = true;
+        container.appendChild(giscusScript);
+        document.body.addEventListener('light-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'light' } } }, 'https://giscus.app');
+        });
+        document.body.addEventListener('dark-theme-set', () => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: 'dark' } } }, 'https://giscus.app');
+        });
+      }
+    }
+  }
+  commentConfig.enable = commentConfigKeys.some(key => commentConfig[key].enable);
+
+  var defaultComment = '';
+  if (commentConfig.enable) {
+    // 1. 首先检查localStorage中是否有保存的评论类型
+    var savedCommentType = localStorage.getItem('commentType');
+    
+    // 2. 如果localStorage中有值且对应的评论系统可用，就使用它
+    if (savedCommentType) {
+      if (commentConfig[savedCommentType]?.enable) {
+        defaultComment = savedCommentType;
+      }
+    }
+    
+    // 3. 如果localStorage无效，检查配置的默认评论系统
+    if (!defaultComment) {
+      var configDefault = 'waline';
+      if (commentConfig[configDefault]?.enable) {
+        defaultComment = configDefault;
+      }
+    }
+    
+    // 4. 如果前两项都无效，按指定顺序找到第一个可用的评论系统
+    if (!defaultComment) {
+      defaultComment = commentConfigKeys.find(sys => commentConfig[sys].enable) || '';
+    }
+  }
+  function loadComments() {
+    if (!commentConfig.enable) return;
+    // 评论组件加载状态跟踪
+    const loadedComments = {
+      valine: false,
+      waline: false,
+      twikoo: false,
+      gitalk: false,
+      giscus: false
+    };
+
+    // 隐藏所有评论容器
+    const hideAllComments = () => {
+      const commentContainers = document.querySelectorAll('.comment');
+      commentContainers.forEach(container => {
+        container.style.display = 'none';
+      });
+    };
+
+    // 按需加载评论系统
+    const loadCommentSystem = (type) => {
+      if (loadedComments[type]) {
+        // 如果已加载，只需显示对应容器
+        document.querySelector(`.${type}-comment`).style.display = 'block';
+        return;
+      }
+
+      // 根据类型加载对应的脚本
+      commentConfig[type]?.load();
+      loadedComments[type] = true;
+    };
+
+    // 评论组件选择器
+    const changeActiveCommentItems = (item) => {
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let i = 0; i < commentItems.length; i++) {
+        commentItems[i].classList.remove('active');
+      }
+      item.classList.add('active');
+
+      // 获取要加载的评论系统类型
+      const commentType = item.getAttribute('data-selector');
+
+      // 隐藏所有评论系统
+      hideAllComments();
+
+      // 加载选中的评论系统
+      loadCommentSystem(commentType);
+    };
+
+    const commentInit = () => {
+      // 评论组件选择器点击事件
+      const commentItems = document.querySelectorAll('.selector-item');
+      for (let item of commentItems) {
+        item.addEventListener('click', () => {
+          // 保存选择器状态
+          const commentType = item.getAttribute('data-selector');
+          window.localStorage.setItem('commentType', commentType);
+          // 切换选中状态
+          changeActiveCommentItems(item);
+        });
+      }
+
+      // 检查是否需要加载默认评论系统
+      if (defaultComment) {
+        const defaultSelectorItem = document.querySelector(`[data-selector="${defaultComment}"]`);
+        if (!defaultSelectorItem) return;
+        defaultSelectorItem.style.display = 'block';
+        defaultSelectorItem.classList.add('active');
+        loadCommentSystem(defaultComment);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', commentInit);
+    } else {
+      commentInit();
+    }
+  };
+  loadComments();
+</script>
+
+      
+    
+  </div>
+</div>
+
+
+  <script>
+    console.log(String.raw`%c 
+ ______     ______     __     __    __     __  __    
+/\  == \   /\  ___\   /\ \   /\ "-./  \   /\ \/\ \   
+\ \  __<   \ \  __\   \ \ \  \ \ \-./\ \  \ \ \_\ \  
+ \ \_\ \_\  \ \_____\  \ \_\  \ \_\ \ \_\  \ \_____\ 
+  \/_/ /_/   \/_____/   \/_/   \/_/  \/_/   \/_____/ 
+                                                  
+`,'color: #ff5252;')
+    console.log('%c Theme.Reimu v' + '1.9.2' + ' %c https://github.com/D-Sketon/hexo-theme-reimu ', 'color: white; background: #ff5252; padding:5px 0;', 'padding:4px;border:1px solid #ff5252;')
+  </script>
+  
+
+
+
+  <script src="https://www.vercount.one/js" defer></script>
+
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+
+    
+  </body>
+  </html>
+
